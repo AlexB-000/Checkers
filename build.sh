@@ -1,1 +1,1 @@
-g++ -O3 main.cpp ../../Cpp_AI_lib/bin/linear.o ../../Cpp_AI_lib/bin/network.o ../../Cpp_AI_lib/bin/optimizers/GD.o -o checkers -lsfml-graphics -lsfml-system -lsfml-window
+icpx -O3 main.cpp ../Cpp_AI_lib/bin/linear.o ../Cpp_AI_lib/bin/network.o ../Cpp_AI_lib/bin/optimizers/GD.o -o checkers -lsfml-graphics -lsfml-system -lsfml-window
