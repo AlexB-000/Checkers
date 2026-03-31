@@ -99,6 +99,18 @@ struct NeuralNetPlayer: virtual public Bot{
             return {};
         }
 
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dis(0, 1);
+        if (dis(gen) < exploration) {
+            // exploration : we choose a random move
+            std::uniform_int_distribution<uint32_t> dis_move(0, valid_moves.size() - 1);
+            uint32_t idx = dis_move(gen);
+            state_action = toArray(board);
+            q = model.forward(state_action)[0];
+            return valid_moves[idx];
+        }
+
         std::vector<float> scores (valid_moves.size(), 0.0f);
         std::vector<Array<float>> states (valid_moves.size());
         
@@ -113,44 +125,23 @@ struct NeuralNetPlayer: virtual public Bot{
         }
         if (show_scores) std::cout << std::endl;
         
-        // rescale over [0; +inf[
-        float min_score = INFINITY;
+        std::vector<uint32_t> options {};
+        q = *std::max_element(scores.begin(), scores.end());
         for (uint32_t i=0; i < valid_moves.size(); i++){
-            if (scores[i] < min_score){
-                min_score = scores[i];
+            if (scores[i] == q) {
+               options.push_back(i);
             }
         }
-        min_score -= exploration;
-        float sum = 0.0f;
-        for (uint32_t i=0; i < valid_moves.size(); i++){
-            // we put score[i] n [0; +inf[
-            scores[i] -= min_score;
-            sum += scores[i];
-        }
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> dis(0, sum);
-        float rand = dis(gen);
-        
-        std::vector<std::vector<uint16_t>> move;
-        float cumulated = 0.0f;
-        for (uint32_t i=0; i < valid_moves.size(); i++){
-            cumulated += scores[i];
-            if (rand <= cumulated) {
-                move = valid_moves[i];
-                // we get the score before the correction
-                q = scores[i] + min_score;
-                state_action = states[i];
-                break;
-            }
-        }
-        return move;
+        std::uniform_int_distribution<uint32_t> dis_move(0, options.size() - 1);
+        uint32_t idx = options[dis_move(gen)];
+        state_action = states[idx];
+        return valid_moves[idx];
     }
 
     std::vector<std::vector<uint16_t>> move(const CheckersBoard& board, bool show_q) {
         float q;
         Array<float> b;
-        std::vector<std::vector<uint16_t>> move = getAction(board, q, b, 0.01f);
+        std::vector<std::vector<uint16_t>> move = getAction(board, q, b, 0);
         if (show_q)
         std::cout << "Q value : " << q << std::endl;
         return move;
@@ -159,7 +150,7 @@ struct NeuralNetPlayer: virtual public Bot{
     std::vector<std::vector<uint16_t>> move(const CheckersBoard& board) override {
         float q;
         Array<float> b;
-        std::vector<std::vector<uint16_t>> move = getAction(board, q, b, 0.01f, true);
+        std::vector<std::vector<uint16_t>> move = getAction(board, q, b, 0);
         std::cout << "Q value : " << q << std::endl;
         return move;
     }
