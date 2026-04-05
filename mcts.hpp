@@ -251,19 +251,20 @@ struct MCTS: Bot{
         @param factor: exploration parameter
         */
         float best_score = -INFINITY;
-        std::vector<Node*> best_children;
+        std::vector<uint32_t> best_children_idx;
 
-        for (Node& c: node.children){
-            float exploitation = c.reward / c.visits;
-            float exploration = std::sqrt(std::log2(node.visits) / c.visits);
+        for (uint32_t i=0; i < node.children.size(); i++){
+            const Node& c = node.children[i];
+            float exploitation = c.reward / static_cast<float>(c.visits);
+            float exploration = std::sqrt(std::log2(static_cast<float>(node.visits)) / static_cast<float>(c.visits) );
 
             float score = exploitation + exploration_parameter * exploration;
 
             if (score == best_score)
-                best_children.push_back(&c);
+                best_children_idx.push_back(i);
 
             else if (score > best_score){
-                best_children = {&c};
+                best_children_idx = {i};
                 best_score = score;
             }
         }
@@ -271,9 +272,9 @@ struct MCTS: Bot{
         // random numbers generator
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<uint32_t> dis(0, best_children.size() - 1);
+        std::uniform_int_distribution<uint32_t> dis(0, best_children_idx.size() - 1);
         
-        return dis(gen);
+        return best_children_idx[dis(gen)];
     }
 
     std::vector<std::vector<uint16_t>> move(const CheckersBoard& board) override {

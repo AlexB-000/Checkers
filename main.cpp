@@ -8,7 +8,6 @@
 #include "minimax.hpp"
 #include "mcts.hpp"
 #include "neuralNet.hpp"
-#include "miniNet.hpp"
 
 int main(int argc, char* argv[]){
     std::shared_ptr<Player> player1;
@@ -25,13 +24,10 @@ int main(int argc, char* argv[]){
         player1 = std::make_shared<Minimax>(1, 4, true);
 
     } else if (std::string(argv[1]) == "mcts"){
-        player1 = std::make_shared<MCTS>(1, 4000, 2, true);
+        player1 = std::make_shared<MCTS>(1, 1000, 2, true);
 
     } else if (std::string(argv[1]) == "net"){
         player1 = std::make_shared<NeuralNetPlayer>(1, std::string(argv[2]));
-        next_arg++;
-    } else if (std::string(argv[1]) == "treeNet"){
-        player1 = std::make_shared<MiniNet>(1, std::string(argv[2], 4, true));
         next_arg++;
     }
 
@@ -45,13 +41,11 @@ int main(int argc, char* argv[]){
         player2 = std::make_shared<Minimax>(-1, 4, true);
 
     } else if (std::string(argv[next_arg]) == "mcts"){
-        player2 = std::make_shared<MCTS>(-1, 4000, 2, true);
+        player2 = std::make_shared<MCTS>(-1, 1000, 2, true);
 
     } else if (std::string(argv[next_arg]) == "net"){
         player2 = std::make_shared<NeuralNetPlayer>(-1, std::string(argv[next_arg + 1]));
         
-    } else if (std::string(argv[next_arg]) == "treeNet"){
-        player2 = std::make_shared<MiniNet>(-1, std::string(argv[next_arg + 1], 4, true));
     }
 
     auto window = sf::RenderWindow{{conf::window_size[0], conf::window_size[1]}, "Checkers", sf::Style::Close};
