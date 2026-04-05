@@ -3,11 +3,11 @@
 #include "conf.hpp"
 #include "render.hpp"
 #include "game.hpp"
-#include "randomPlayer.hpp"
-#include "humanPlayer.hpp"
-#include "minimax.hpp"
-#include "mcts.hpp"
-#include "neuralNet.hpp"
+#include "players/randomPlayer.hpp"
+#include "players/humanPlayer.hpp"
+#include "players/minimax.hpp"
+#include "players/mcts.hpp"
+#include "players/neuralNet.hpp"
 
 int main(int argc, char* argv[]){
     std::shared_ptr<Player> player1;
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
         player1 = std::make_shared<Minimax>(1, 4, true);
 
     } else if (std::string(argv[1]) == "mcts"){
-        player1 = std::make_shared<MCTS>(1, 1000, 2, true);
+        player1 = std::make_shared<MCTS>(1, 5000, 2.0, true);
 
     } else if (std::string(argv[1]) == "net"){
         player1 = std::make_shared<NeuralNetPlayer>(1, std::string(argv[2]));
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
         player2 = std::make_shared<Minimax>(-1, 4, true);
 
     } else if (std::string(argv[next_arg]) == "mcts"){
-        player2 = std::make_shared<MCTS>(-1, 1000, 2, true);
+        player2 = std::make_shared<MCTS>(-1, 5000, 2.0, true);
 
     } else if (std::string(argv[next_arg]) == "net"){
         player2 = std::make_shared<NeuralNetPlayer>(-1, std::string(argv[next_arg + 1]));
@@ -76,8 +76,10 @@ int main(int argc, char* argv[]){
                     case sf::Keyboard::Escape:
                         window.close();
                         break;
-                    break;
+                    default:
+                        break;
                 }
+                break;
             case sf::Event::MouseButtonPressed:
                 if (event.mouseButton.button == sf::Mouse::Left){
                     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
@@ -85,6 +87,8 @@ int main(int argc, char* argv[]){
                     uint32_t r = localPosition.y / conf::square_size[1];
                     game.input(r, col);
                 }
+                break;
+            default:
                 break;
             }
         }

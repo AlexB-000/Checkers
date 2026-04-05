@@ -1,7 +1,7 @@
 #pragma once
-#include "../Cpp_AI_lib/Cpp_AI.hpp"
+#include "../../Cpp_AI_lib/Cpp_AI.hpp"
 #include "bot.hpp"
-#include "conf.hpp"
+#include "../conf.hpp"
 
 Network buildNetwork(std::string file = ""){
     Network model;

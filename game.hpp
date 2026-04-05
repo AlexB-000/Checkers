@@ -4,7 +4,7 @@
 #include <chrono>
 
 #include "utils.hpp"
-#include "Player.hpp"
+#include "players/player.hpp"
 #include "CheckersBoard.hpp"
 
 bool contains(const std::vector<std::vector<std::vector<uint16_t>>>& vector, const std::vector<std::vector<uint16_t>>& target){

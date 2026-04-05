@@ -2,7 +2,7 @@
 #include <thread>
 #include "conf.hpp"
 #include "CheckersBoard.hpp"
-#include "neuralNet.hpp"
+#include "players/neuralNet.hpp"
 
 Network crossover(Network& parent1, Network& parent2){
     std::random_device rd;

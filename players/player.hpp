@@ -1,5 +1,5 @@
 #pragma once
-#include "CheckersBoard.hpp"
+#include "../CheckersBoard.hpp"
 
 struct Player{
     Player(short inPlayer = 1, char inType=0): player(inPlayer), type(inType) {}

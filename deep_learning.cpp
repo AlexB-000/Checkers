@@ -2,7 +2,7 @@
 #include <thread>
 #include "conf.hpp"
 #include "CheckersBoard.hpp"
-#include "neuralNet.hpp"
+#include "players/neuralNet.hpp"
 
 void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target,
     const NeuralNetPlayer& player, float gamma=0.9f, float exploration=0.1f){
