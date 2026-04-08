@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Cpp_AI_lib/Cpp_AI.hpp"
+#include "CppAI/Cpp_AI.hpp"
 #include "bot.hpp"
 #include "../conf.hpp"
 

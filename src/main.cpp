@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
         
     }
 
-    auto window = sf::RenderWindow{{conf::window_size[0], conf::window_size[1]}, "Checkers", sf::Style::Close};
+    auto window = sf::RenderWindow{sf::VideoMode({conf::window_size[0], conf::window_size[1]}), "Checkers", sf::Style::Close};
 
     CheckersGame game (&(*player1), &(*player2), conf::board_size[0], conf::board_size[1]);
     Render render(game, &window);
@@ -64,32 +64,25 @@ int main(int argc, char* argv[]){
 
     while (window.isOpen())
     {
-        for (auto event = sf::Event(); window.pollEvent(event);)
+        while (const std::optional event = window.pollEvent())
         {   
-            switch (event.type)
+            if (event->is<sf::Event::Closed>())
             {
-            case sf::Event::Closed:
                 window.close();
-                break;
-            case sf::Event::KeyPressed:
-                switch (event.key.code){
-                    case sf::Keyboard::Escape:
-                        window.close();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case sf::Event::MouseButtonPressed:
-                if (event.mouseButton.button == sf::Mouse::Left){
+            }
+            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
+            {
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
+                    window.close();
+            }
+            else if (const auto& mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>())
+            {
+                if (mouseButtonPressed->button == sf::Mouse::Button::Left){
                     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
                     uint32_t col = localPosition.x / conf::square_size[0];
                     uint32_t r = localPosition.y / conf::square_size[1];
                     game.input(r, col);
                 }
-                break;
-            default:
-                break;
             }
         }
 

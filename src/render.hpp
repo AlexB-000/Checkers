@@ -33,11 +33,11 @@ struct Render: Observer
 
         sf::CircleShape pawn_shape;
         pawn_shape.setRadius(conf::pawn_radius);
-        pawn_shape.setOrigin(conf::pawn_radius, conf::pawn_radius);
+        pawn_shape.setOrigin({conf::pawn_radius, conf::pawn_radius});
 
         sf::CircleShape queen_shape;
         queen_shape.setRadius(conf::queen_radius);
-        queen_shape.setOrigin(conf::queen_radius, conf::queen_radius);
+        queen_shape.setOrigin({conf::queen_radius, conf::queen_radius});
 
         sf::Color square_color;
         sf::Color pawn_color;
@@ -51,7 +51,7 @@ struct Render: Observer
                 if (i == game.selectedPawn[0] && j == game.selectedPawn[1]) selected = 1;
                 else selected = 0;
 
-                square_shape.setPosition(j * conf::square_size[0], i * conf::square_size[1]);
+                square_shape.setPosition({static_cast<float>(j * conf::square_size[0]), static_cast<float>(i * conf::square_size[1])});
 
                 if (!((i+j) % 2)) square_color = Grid_White;
                 else square_color = Grid_Black;
@@ -62,8 +62,8 @@ struct Render: Observer
 
                 if (game.checkBoard.board[i][j] != 0){
 
-                    pawn_shape.setPosition(j * conf::square_size[0] + conf::square_size[0]/2,
-                                           i * conf::square_size[1] + conf::square_size[1]/2);
+                    pawn_shape.setPosition({static_cast<float>(j * conf::square_size[0] + conf::square_size[0]/2),
+                                            static_cast<float>(i * conf::square_size[1] + conf::square_size[1]/2)});
 
                     if (game.checkBoard.board[i][j] == game.checkBoard.starter_player)
                         pawn_color = Player_White[selected];
@@ -81,8 +81,8 @@ struct Render: Observer
                     
                     if (std::abs(game.checkBoard.board[i][j]) != 2) continue;
 
-                    queen_shape.setPosition(j * conf::square_size[0] + conf::square_size[0]/2,
-                                            i * conf::square_size[1] + conf::square_size[1]/2);
+                    queen_shape.setPosition({static_cast<float>(j * conf::square_size[0] + conf::square_size[0]/2),
+                                             static_cast<float>(i * conf::square_size[1] + conf::square_size[1]/2)});
 
                     if (game.checkBoard.board[i][j] == game.checkBoard.starter_player * 2)
                         queenColor = Player_Queen_In_White[selected];

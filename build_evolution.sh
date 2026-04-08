@@ -1,1 +1,0 @@
-icpx evolution.cpp -O3 ../Cpp_AI_lib/bin/linear.o ../Cpp_AI_lib/bin/network.o ../Cpp_AI_lib/bin/optimizers/GD.o -o evolution

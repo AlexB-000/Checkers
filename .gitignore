@@ -1,7 +1,5 @@
 .vscode/
-deep_learning
-evolution
-checkers
+build
 
 # Prerequisites
 *.d
