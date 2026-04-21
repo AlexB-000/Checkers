@@ -174,7 +174,7 @@ struct CheckersBoard
 
     //MARK: get_eat_moves
     std::vector<std::vector<std::vector<uint16_t>>> get_eat_moves(uint16_t row, uint16_t col,
-        std::vector<std::vector<uint16_t>> eaten, std::vector<std::vector<short>> in_board, std::vector<int>& move_stats) const {
+        std::vector<std::vector<short>> in_board, std::vector<int>& move_stats) const {
         int best_move = 0;
         std::vector<std::vector<std::vector<uint16_t>>> eat_moves;
 
@@ -196,11 +196,6 @@ struct CheckersBoard
                     uint16_t target_row = row + i*step;
                     uint16_t target_col = col + j*step;
 
-                    // Check if it already ate this pawn
-                    if (contains(eaten, std::vector<uint16_t>{target_row, target_col})){
-                        break;
-                    }
-
                     // Check if the target position is within bounds
                     if(target_row >= size[0] || target_col >= size[1]) break;
 
@@ -214,12 +209,9 @@ struct CheckersBoard
                         next_board[inter_row][inter_col] = 0;
                         next_board[target_row][target_col] = in_board[row][col];
 
-                        std::vector<std::vector<uint16_t>> next_eaten = eaten;
-                        next_eaten.push_back({target_row, target_col});
-
                         std::vector<int> next_moves_stats;
                         std::vector<std::vector<std::vector<uint16_t>>> next_moves =
-                            get_eat_moves(target_row, target_col, next_eaten, next_board, next_moves_stats);
+                            get_eat_moves(target_row, target_col, next_board, next_moves_stats);
 
                         if (next_moves.size() == 0){
                             if (best_move < 1) {
@@ -272,8 +264,7 @@ struct CheckersBoard
 
     std::vector<std::vector<std::vector<uint16_t>>> get_eat_moves(uint16_t row, uint16_t col) const {
         std::vector<int> move_stats;
-        std::vector<std::vector<uint16_t>> eaten;
-        return get_eat_moves(row, col, eaten, board, move_stats);
+        return get_eat_moves(row, col, board, move_stats);
     }
 
     std::vector<std::vector<std::vector<uint16_t>>> get_eat_moves(short player) const {
