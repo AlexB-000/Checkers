@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
         player1 = std::make_shared<randomPlayer>(1);
 
     } else if (std::string(argv[1]) == "minimax"){
-        player1 = std::make_shared<Minimax>(1, 4, true);
+        player1 = std::make_shared<Minimax>(1, 6, true);
 
     } else if (std::string(argv[1]) == "mcts"){
         player1 = std::make_shared<MCTS>(1, 5000, 2.0, true);
