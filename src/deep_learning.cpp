@@ -4,6 +4,26 @@
 #include "CheckersBoard.hpp"
 #include "players/neuralNet.hpp"
 
+void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<float>>& target,
+    std::vector<Array<float>>& batch_data, std::vector<Array<float>>& batch_target, uint32_t batch_size){
+    
+    if (data.size() == 0) return;
+    if (data.size() < batch_size) batch_size = data.size();
+
+    batch_data.clear();
+    batch_target.clear();
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint32_t> dis(0, data.size() - 1);
+
+    for (uint32_t i = 0; i < batch_size; i++){
+        uint32_t idx = dis(gen);
+        batch_data.push_back(data[idx]);
+        batch_target.push_back(target[idx]);
+    }
+}
+
 void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target,
     const NeuralNetPlayer& player, float gamma=0.9f, float exploration=0.1f){
 
@@ -33,6 +53,7 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
     bool reached_final_s = false;
     uint32_t count = 0;
 
+    // run the game
     bool running = true;
     while (running) {
         count++;
@@ -113,6 +134,7 @@ void collect_data(std::vector<Array<float>>& data, std::vector<Array<float>>& ta
     std::vector<std::vector<Array<float>>> target_threads (games);
 
     std::vector<std::thread> threads;
+    threads.reserve(games);
 
     for(uint32_t i = 0; i < games; i++){
         threads.emplace_back(simulate, &data_threads[i], &target_threads[i], player, gamma, exploration);
@@ -127,7 +149,7 @@ void collect_data(std::vector<Array<float>>& data, std::vector<Array<float>>& ta
 }
 
 NeuralNetPlayer train(const NeuralNetPlayer& starting_player, uint32_t iteratons=100, uint32_t games=100,
-    float lr=0.01f, float gamma=0.9f, float exploration=0.1f){
+    uint32_t replay_batch_size=10000, uint32_t GDepochs=10, uint32_t GDbatch_size=128, float lr=0.01f, float gamma=0.9f, float exploration=0.1f){
     
     NeuralNetPlayer player{1, starting_player};
 
@@ -136,15 +158,22 @@ NeuralNetPlayer train(const NeuralNetPlayer& starting_player, uint32_t iteratons
     MSELoss loss {1};
     GD optimizer(&player.model, &loss);
 
-    for(uint32_t i = 0; i < iteratons; i++){
-        std::cout << "                      iteration " << i+1 << "/" << iteratons << std::endl;
+    std::vector<Array<float>> data, target;
 
-        std::vector<Array<float>> data;
-        std::vector<Array<float>> target;
+    for(uint32_t i = 0; i < iteratons; i++){
+        std::cout << "Iteration " << i+1 << "/" << iteratons << std::endl;
+
         collect_data(data, target, player, games, gamma, exploration);
 
-        optimizer.train(data, target, 1, 100, lr, 0);
-    }
+        std::cout << "\tData collected : " << data.size() << " samples" << std::endl;
+
+        float average_game_length = data.size() / static_cast<float>(games * (i + 1));
+        std::cout << "\tAverage game length : " << average_game_length << " moves" << std::endl;
+
+        std::vector<Array<float>> batch_data, batch_target;
+        fill_batch(data, target, batch_data, batch_target, replay_batch_size);
+        optimizer.train(batch_data, batch_target, GDepochs, GDbatch_size, lr);
+    }    
     return player;
 }
 
@@ -167,7 +196,7 @@ int main(int argc, char* argv[]){
     }
     
     NeuralNetPlayer player{1, load_file};
-    player = train(player, 50, 100, 0.01, 0.9f, 0.1f);
+    player = train(player, 10, 1000, 10000, 5, 128, 0.01, 0.9f, 0.1f);
 
     auto params = player.model.get_parameters();
     for (auto p: params){

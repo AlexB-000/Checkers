@@ -3,9 +3,11 @@
 #include "bot.hpp"
 #include "../conf.hpp"
 
+constexpr uint16_t input_size = conf::board_size[0] * conf::board_size[1] * 4;
+
 Network buildNetwork(std::string file = ""){
     Network model;
-    model.stackLayer(std::make_shared<Linear>(conf::board_size[0] * conf::board_size[1] * 2, 64));
+    model.stackLayer(std::make_shared<Linear>(input_size, 64));
     model.stackLayer(std::make_shared<ReLU>(64));
     model.stackLayer(std::make_shared<Linear>(64, 64));
     model.stackLayer(std::make_shared<ReLU>(64));
@@ -20,9 +22,11 @@ Network buildNetwork(std::string file = ""){
 Array<float> toArray(const CheckersBoard& state, short turn = 0){
     if (turn == 0) turn = state.turn;
 
-    Array<float> encoded_state {{ static_cast<uint>(state.size[0] * state.size[1] * 2) }, 0.0f};
+    Array<float> encoded_state {{ input_size }, 0.0f};
     
     const uint32_t queen_offset = state.size[0] * state.size[1];
+    const uint32_t player_offset = state.size[0] * state.size[1];
+
     const short friend_pawn = turn;
     const short enemy_pawn = -turn;
     const short friend_queen = turn * 2;
@@ -41,10 +45,10 @@ Array<float> toArray(const CheckersBoard& state, short turn = 0){
                     encoded_state[idx + queen_offset ] = 1;
 
                 } else if (state.board[i][j] == enemy_pawn){
-                    encoded_state[idx] = -1;
+                    encoded_state[idx + player_offset ] = 1;
 
                 } else if (state.board[i][j] == enemy_queen){
-                    encoded_state[idx + queen_offset ] = -1;
+                    encoded_state[idx + queen_offset + player_offset ] = 1;
                 }
             }
         }
@@ -62,10 +66,10 @@ Array<float> toArray(const CheckersBoard& state, short turn = 0){
                     encoded_state[idx + queen_offset ] = 1;
 
                 } else if (state.board[i][j] == enemy_pawn){
-                    encoded_state[idx] = -1;
+                    encoded_state[idx + player_offset ] = 1;
 
                 } else if (state.board[i][j] == enemy_queen){
-                    encoded_state[idx + queen_offset ] = -1;
+                    encoded_state[idx + queen_offset + player_offset ] = 1;
                 }
             }
         }
