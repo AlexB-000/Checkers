@@ -24,6 +24,16 @@ void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<f
     }
 }
 
+inline float get_reward(const CheckersBoard& game, short turn){
+    if (game.winner == turn){
+        return 1.0f;
+    } else if (game.winner == -turn){
+        return -1.0f;
+    } else {
+        return 0.0f;
+    }
+}
+
 void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target,
     const NeuralNetPlayer& player, float gamma=0.9f, float exploration=0.1f){
 
@@ -68,13 +78,8 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
                 reached_final_s = true;
             }
             // set the reward
-            if (game.checkWin() == game.turn){
-                reward = 1;
-            } else if (game.checkWin() == -game.turn){
-                reward = -1;
-            } else {
-                reward = 0;
-            }
+            reward = get_reward(game, game.turn);
+
             if (reached_final_s) {
                 v1_next = 0.0f;
             }
@@ -97,13 +102,8 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
                 reached_final_s = true;
             }
             // set the reward
-            if (game.checkWin() == game.turn){
-                reward = 1;
-            } else if (game.checkWin() == -game.turn){
-                reward = -1;
-            } else {
-                reward = 0;
-            }
+            reward = get_reward(game, game.turn);
+
             if (reached_final_s) {
                 v2_next = 0.0f;
             }
@@ -173,7 +173,7 @@ NeuralNetPlayer train(const NeuralNetPlayer& starting_player, uint32_t iteratons
         std::vector<Array<float>> batch_data, batch_target;
         fill_batch(data, target, batch_data, batch_target, replay_batch_size);
         optimizer.train(batch_data, batch_target, GDepochs, GDbatch_size, lr);
-    }    
+    }
     return player;
 }
 
@@ -196,11 +196,11 @@ int main(int argc, char* argv[]){
     }
     
     NeuralNetPlayer player{1, load_file};
-    player = train(player, 10, 1000, 10000, 5, 128, 0.01, 0.9f, 0.1f);
+    player = train(player, 100, 100, 10000, 5, 128, 0.01, 0.9f, 0.1f);
 
-    auto params = player.model.get_parameters();
-    for (auto p: params){
-        p->show();
-    }
+    // auto params = player.model.get_parameters();
+    // for (auto p: params){
+    //     p->show();
+    // }
     player.model.save(save_file);
 }
