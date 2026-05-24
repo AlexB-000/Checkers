@@ -9,6 +9,11 @@ struct Minimax: virtual public Bot{
     Minimax(const Minimax& other): Bot(other.player), _depth(other._depth), _prunning(other._prunning) {}
 
     virtual float score_position(const CheckersBoard& board, short turn) {
+        // won
+        if ( board.winner == turn ) return INFINITY;
+        // lost
+        if ( board.winner == -turn ) return -INFINITY;
+
         int player1 = 0;
         int player2 = 0;
         for(uint16_t r = 0; r < board.size[0]; ++r){
@@ -27,11 +32,6 @@ struct Minimax: virtual public Bot{
                 }
             }
         }
-
-        // won
-        if ( board.winner == turn ) return INFINITY;
-        // lost
-        if ( board.winner == -turn ) return -INFINITY;
 
         if (turn == 1) return player1 - player2;
         return player2 - player1;
@@ -68,7 +68,6 @@ struct Minimax: virtual public Bot{
             return result;
         }
 
-        short turn;
         if (maximizingPlayer){
             score = -INFINITY;
         }

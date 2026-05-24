@@ -143,7 +143,7 @@ struct CheckersBoard
                     uint16_t new_col = col + j*step;
 
                     // Check if the new position is within bounds
-                    if(new_row >= size[0] || new_col >= size[1]) break;
+                    if(new_row >= size[0] || new_row < 0 || new_col >= size[1] || new_col < 0) break;
 
                     if(board[new_row][new_col] == 0){
                         valid_moves.push_back(std::vector<std::vector<uint16_t>> {{row, col, new_row, new_col}});
@@ -197,7 +197,7 @@ struct CheckersBoard
                     uint16_t target_col = col + j*step;
 
                     // Check if the target position is within bounds
-                    if(target_row >= size[0] || target_col >= size[1]) break;
+                    if(target_row >= size[0] || target_row < 0 || target_col >= size[1] || target_col < 0) break;
 
                     if (in_board[target_row][target_col] == 0){
                         if (!pawn) continue;
@@ -226,11 +226,9 @@ struct CheckersBoard
                             for (uint32_t i = 0; i < next_moves.size(); i++){
                                 const std::vector<std::vector<uint16_t>>& m = next_moves[i];
 
-                                std::vector<std::vector<uint16_t>> complete_move;
-                                complete_move.push_back(move[0]);
-                                for (const std::vector<uint16_t>& sub_move : m){
-                                    complete_move.push_back(sub_move);
-                                }
+                                std::vector<std::vector<uint16_t>> complete_move = {move[0]};
+                                complete_move.insert(complete_move.end(), m.begin(), m.end());
+                                
                                 int eat_num = 1 + next_moves_stats[i];
                                 if (best_move < eat_num) {
                                     best_move = eat_num;

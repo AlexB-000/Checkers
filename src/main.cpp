@@ -21,10 +21,10 @@ int main(int argc, char* argv[]){
         player1 = std::make_shared<randomPlayer>(1);
 
     } else if (std::string(argv[1]) == "minimax"){
-        player1 = std::make_shared<Minimax>(1, 6, true);
+        player1 = std::make_shared<Minimax>(1, 8, true);
 
     } else if (std::string(argv[1]) == "mcts"){
-        player1 = std::make_shared<MCTS>(1, 5000, 2.0, true);
+        player1 = std::make_shared<MCTS>(1, 2000, 5.0, true);
 
     } else if (std::string(argv[1]) == "net"){
         player1 = std::make_shared<NeuralNetPlayer>(1, std::string(argv[2]));
@@ -38,10 +38,10 @@ int main(int argc, char* argv[]){
         player2 = std::make_shared<randomPlayer>(-1);
 
     } else if (std::string(argv[next_arg]) == "minimax"){
-        player2 = std::make_shared<Minimax>(-1, 4, true);
+        player2 = std::make_shared<Minimax>(-1, 8, true);
 
     } else if (std::string(argv[next_arg]) == "mcts"){
-        player2 = std::make_shared<MCTS>(-1, 5000, 2.0, true);
+        player2 = std::make_shared<MCTS>(-1, 2000, 5.0, true);
 
     } else if (std::string(argv[next_arg]) == "net"){
         player2 = std::make_shared<NeuralNetPlayer>(-1, std::string(argv[next_arg + 1]));

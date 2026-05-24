@@ -100,6 +100,7 @@ struct CheckersGame: Observable {
         std::vector<uint16_t> move = {static_cast<uint16_t>(selectedPawn[0]), static_cast<uint16_t>(selectedPawn[1]),
                                       pos[0], pos[1]};
 
+        // start of a new sequence
         if (played_move_options.size() == 0){
             std::vector<std::vector<std::vector<uint16_t>>> valid_moves = checkBoard.get_valid_moves(checkBoard.turn);
             
