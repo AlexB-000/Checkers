@@ -8,6 +8,7 @@
 #include "players/minimax.hpp"
 #include "players/mcts.hpp"
 #include "players/neuralNet.hpp"
+#include "players/CheckerZero.hpp"
 
 int main(int argc, char* argv[]){
     std::shared_ptr<Player> player1;
@@ -29,6 +30,10 @@ int main(int argc, char* argv[]){
     } else if (std::string(argv[1]) == "net"){
         player1 = std::make_shared<NeuralNetPlayer>(1, std::string(argv[2]));
         next_arg++;
+
+    } else if (std::string(argv[1]) == "c0"){
+        player1 = std::make_shared<CheckerZero>(1, std::string(argv[2]), 10000, 5.0, true);
+        next_arg++;
     }
 
     if (std::string(argv[next_arg]) == "human"){
@@ -46,6 +51,8 @@ int main(int argc, char* argv[]){
     } else if (std::string(argv[next_arg]) == "net"){
         player2 = std::make_shared<NeuralNetPlayer>(-1, std::string(argv[next_arg + 1]));
         
+    } else if (std::string(argv[next_arg]) == "c0"){
+        player2 = std::make_shared<CheckerZero>(-1, std::string(argv[next_arg + 1]), 10000, 5.0, true);
     }
 
     auto window = sf::RenderWindow{sf::VideoMode({conf::window_size[0], conf::window_size[1]}), "Checkers", sf::Style::Close};

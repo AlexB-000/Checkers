@@ -70,13 +70,11 @@ struct CheckersBoard
                 }
             }
         }
-
         if(!player1_has_pawns){
             winner = -1;
         } else if(!player2_has_pawns){
             winner = 1;
         }
-
         return winner;
     }
 

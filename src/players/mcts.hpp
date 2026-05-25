@@ -85,7 +85,7 @@ struct MCTS: Bot{
         _fixed_calculation_time(in_fixed_calculation_time) {}
 
     std::vector<std::vector<uint16_t>> monte_carlo_tree_search(
-        Node inRoot, short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true
+        const Node& inRoot, short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true
     ){
         /**
         Main function of MCTS, called whenever a move is needed.
