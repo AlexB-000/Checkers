@@ -10,4 +10,6 @@ namespace conf {
     constexpr unsigned int queen_radius = pawn_radius * 0.7;
 
     constexpr float delay = 0.1;
+
+    constexpr uint32_t moves_to_draw = 300;
 };

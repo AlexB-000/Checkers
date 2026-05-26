@@ -39,7 +39,7 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
 
     CheckersBoard game {conf::board_size[0], conf::board_size[1]};
 
-    std::vector<Array<float>> data1, data2, target1, target2;
+    std::vector<Array<float>> local_data, local_target;
     
     NeuralNetPlayer player1{1, player};
     NeuralNetPlayer player2{-1, player};
@@ -52,10 +52,10 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
     for (uint32_t i=0; i < 2; i++){
         if (game.turn == 1){
             move = player1.getAction(game, v1, state_action, exploration);
-            data1.push_back(state_action);
+            local_data.push_back(state_action);
         } else {
             move = player2.getAction(game, v2, state_action, exploration);
-            data2.push_back(state_action);
+            local_data.push_back(state_action);
         }
         game.play(move);
     }
@@ -71,7 +71,7 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
         if (game.turn == 1){
             move = player1.getAction(game, v1_next, state_action, exploration);
 
-            if (move.size() == 0 || game.checkWin() != 0 || count >= 1000 || reached_final_s){
+            if (move.size() == 0 || game.checkWin() != 0 || count >= conf::moves_to_draw || reached_final_s){
                 if (reached_final_s){
                     running = false;
                 }
@@ -86,16 +86,16 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
             // we compute the target V value to learn
             Array<float> v_target {{1},  reward + gamma * (v1_next) };
 
-            target1.push_back(v_target);
-            data1.push_back(state_action);
+            local_target.push_back(v_target);
+            local_data.push_back(state_action);
             v1 = v1_next;
             if (reached_final_s){
-                target1.push_back(Array<float>({1}, reward));
+                local_target.push_back(Array<float>({1}, reward));
             }
         } else {
             move = player2.getAction(game, v2_next, state_action, exploration);
 
-            if (move.size() == 0 || game.checkWin() != 0 || count >= 1000 || reached_final_s){
+            if (move.size() == 0 || game.checkWin() != 0 || count >= conf::moves_to_draw || reached_final_s){
                 if (reached_final_s){
                     running = false;
                 }
@@ -111,20 +111,17 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
             // we compute the target V value to learn
             Array<float> v_target {{1},  reward + gamma * (v2_next) };
 
-            target1.push_back(v_target);
-            data1.push_back(state_action);
+            local_target.push_back(v_target);
+            local_data.push_back(state_action);
             v2 = v2_next;
             if (reached_final_s){
-                target2.push_back(Array<float>({1}, reward));
+                local_target.push_back(Array<float>({1}, reward));
             }
         }
         game.play(move);
     }
-    data1.insert(data1.end(), data2.begin(), data2.end());
-    target1.insert(target1.end(), target2.begin(), target2.end());
-
-    data->insert(data->end(), data1.begin(), data1.end());
-    target->insert(target->end(), target1.begin(), target1.end());
+    data->insert(data->end(), local_data.begin(), local_data.end());
+    target->insert(target->end(), local_target.begin(), local_target.end());
 }
 
 void collect_data(std::vector<Array<float>>& data, std::vector<Array<float>>& target,

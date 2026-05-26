@@ -8,7 +8,7 @@
 #include "players/minimax.hpp"
 #include "players/mcts.hpp"
 #include "players/neuralNet.hpp"
-#include "players/CheckerZero.hpp"
+#include "players/checkerZero.hpp"
 
 int main(int argc, char* argv[]){
     std::shared_ptr<Player> player1;

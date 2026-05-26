@@ -85,7 +85,7 @@ struct MCTS: Bot{
         _fixed_calculation_time(in_fixed_calculation_time) {}
 
     std::vector<std::vector<uint16_t>> monte_carlo_tree_search(
-        const Node& inRoot, short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true
+        const Node& inRoot, float& reward, short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true
     ){
         /**
         Main function of MCTS, called whenever a move is needed.
@@ -120,19 +120,20 @@ struct MCTS: Bot{
             iterations = iterations - root.visits;
         }
 
-        //std::cout << "Iterations : " << iterations << "\n";
+        std::cout << "Recovered state with " << root.visits << " visits\n";
 
         for (int i = 0; i < iterations; i++){
             short turn;
             Node& node = selection(root, inTurn, turn, exploration_parameter);
-            float reward = simulation(node.state, turn);
-            backpropagation(&node, reward, turn);
+            float simulation_reward = simulation(node.state, turn);
+            backpropagation(&node, simulation_reward, turn);
         }
 
         uint32_t index = best_child(root, 0);
 
         tree = root.children[index];
 
+        reward = root.children[index].reward / static_cast<float>(root.children[index].visits);
         return root.valid_moves[index];
     }
 
@@ -279,6 +280,9 @@ struct MCTS: Bot{
 
     std::vector<std::vector<uint16_t>> move(const CheckersBoard& board) override {
         Node root = Node(board, nullptr);
-        return monte_carlo_tree_search(root, player, _iterations, _exploration_parameter, _fixed_calculation_time);
+        float reward;
+        std::vector<std::vector<uint16_t>> chosen_move = monte_carlo_tree_search(root, reward, player, _iterations, _exploration_parameter, _fixed_calculation_time);
+        std::cout << "Chosen move reward : " << reward << "\n";
+        return chosen_move;
     }
 };

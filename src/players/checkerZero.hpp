@@ -22,13 +22,33 @@ struct CheckerZero: Bot{
 
     Node tree {CheckersBoard(), nullptr};
 
+    CheckerZero(const CheckerZero& other) = default;
+
+    CheckerZero(short inPlayer, const CheckerZero& other): 
+        Bot(inPlayer),
+        model(other.model),
+        _iterations(other._iterations),
+        _exploration_parameter(other._exploration_parameter),
+        _fixed_calculation_time(other._fixed_calculation_time) {}
+
+    CheckerZero& operator=(const CheckerZero& other){
+        player = other.player;
+        model = other.model;
+        _iterations = other._iterations;
+        _exploration_parameter = other._exploration_parameter;
+        _fixed_calculation_time = other._fixed_calculation_time;
+        return (*this);
+    }
+
     CheckerZero(short inPlayer, std::string file = "",
         int in_interations=100, float in_exploration_parameter=0, bool in_fixed_calculation_time = true):
         Bot(inPlayer), model(buildNetwork(file)), _iterations(in_interations), _exploration_parameter(in_exploration_parameter),
         _fixed_calculation_time(in_fixed_calculation_time) {}
 
-    std::vector<std::vector<uint16_t>> monte_carlo_tree_search(
-        const Node& inRoot, short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true
+    std::vector<std::vector<uint16_t>> DL_tree_search(
+        const Node& inRoot, float& reward,
+        short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true,
+        bool display=false
     ){
         /**
         Main function of CheckerZero, called whenever a move is needed.
@@ -63,19 +83,22 @@ struct CheckerZero: Bot{
             iterations = iterations - root.visits;
         }
 
-        //std::cout << "Iterations : " << iterations << "\n";
+        if (display){
+            std::cout << "Recovered state with " << root.visits << " visits\n";
+        }
 
         for (int i = 0; i < iterations; i++){
             short turn;
             Node& node = selection(root, inTurn, turn, exploration_parameter);
-            float reward = estimation(node, turn);
-            backpropagation(&node, reward, turn);
+            float estimated_reward = estimation(node, turn);
+            backpropagation(&node, estimated_reward, turn);
         }
 
         uint32_t index = best_child(root, 0);
 
         tree = root.children[index];
 
+        reward = root.children[index].reward / static_cast<float>(root.children[index].visits);
         return root.valid_moves[index];
     }
 
@@ -204,6 +227,15 @@ struct CheckerZero: Bot{
 
     std::vector<std::vector<uint16_t>> move(const CheckersBoard& board) override {
         Node root = Node(board, nullptr);
-        return monte_carlo_tree_search(root, player, _iterations, _exploration_parameter, _fixed_calculation_time);
+        float reward;
+        std::vector<std::vector<uint16_t>> chosen_move = DL_tree_search(root, reward,
+            player, _iterations, _exploration_parameter, _fixed_calculation_time, true);
+        std::cout << "Chosen move reward : " << reward << "\n";
+        return chosen_move;
+    }
+
+    std::vector<std::vector<uint16_t>> move(const CheckersBoard& board, float& reward) {
+        Node root = Node(board, nullptr);
+        return DL_tree_search(root, reward, player, _iterations, _exploration_parameter, _fixed_calculation_time);
     }
 };

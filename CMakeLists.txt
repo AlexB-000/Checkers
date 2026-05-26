@@ -30,3 +30,8 @@ add_executable(deep_learning src/deep_learning.cpp)
 target_compile_features(deep_learning PRIVATE cxx_std_17)
 target_link_libraries(deep_learning PRIVATE CppAI)
 target_compile_options(deep_learning PRIVATE -O3)
+
+add_executable(CheckerZero_learning src/CheckerZero_learning.cpp)
+target_compile_features(CheckerZero_learning PRIVATE cxx_std_17)
+target_link_libraries(CheckerZero_learning PRIVATE CppAI)
+target_compile_options(CheckerZero_learning PRIVATE -O3)
