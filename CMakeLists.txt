@@ -11,7 +11,7 @@ FetchContent_Declare(SFML
     EXCLUDE_FROM_ALL
     SYSTEM)
 FETCHContent_Declare(CppAI
-    GIT_REPOSITORY git@github.com:AlexB-000/Cpp_AI_lib.git
+    GIT_REPOSITORY https://github.com/AlexB-000/Cpp_AI_lib.git
     GIT_TAG main
 )
 FetchContent_MakeAvailable(SFML CppAI)
