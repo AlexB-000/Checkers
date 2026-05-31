@@ -1,8 +1,18 @@
+#include <chrono>
 #include <random>
 #include <thread>
 #include "conf.hpp"
 #include "CheckersBoard.hpp"
 #include "players/checkerZero.hpp"
+
+namespace train_conf{
+    uint32_t iterations = 50;
+    uint32_t games = 100;
+    uint32_t replay_batch_size = 50000;
+    uint32_t GDepochs = 5;
+    uint32_t GDbatch_size = 128;
+    float lr = 0.01f;
+}
 
 void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<float>>& target,
     std::vector<Array<float>>& batch_data, std::vector<Array<float>>& batch_target, uint32_t batch_size){
@@ -101,6 +111,7 @@ CheckerZero train(const CheckerZero& starting_player, uint32_t iteratons=100, ui
 
     for(uint32_t i = 0; i < iteratons; i++){
         std::cout << "Iteration " << i+1 << "/" << iteratons << std::endl;
+        auto start = std::chrono::high_resolution_clock::now();
 
         collect_data(data, target, player, games);
 
@@ -112,6 +123,10 @@ CheckerZero train(const CheckerZero& starting_player, uint32_t iteratons=100, ui
         std::vector<Array<float>> batch_data, batch_target;
         fill_batch(data, target, batch_data, batch_target, replay_batch_size);
         optimizer.train(batch_data, batch_target, GDepochs, GDbatch_size, lr);
+
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::seconds iteration_time = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+        std::cout << "\tIteration time : " << iteration_time.count() << " s" << std::endl;
     }
     return player;
 }
@@ -135,8 +150,17 @@ int main(int argc, char* argv[]){
     }
     
     CheckerZero player{1, load_file, 1000, 5.0f, true};
-    player = train(player, 10, 100, 10000, 5, 128, 0.01);
 
+    auto start = std::chrono::high_resolution_clock::now();
+    player = train(player, train_conf::iterations, train_conf::games,
+                    train_conf::replay_batch_size, train_conf::GDepochs, train_conf::GDbatch_size, train_conf::lr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::seconds training_time = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+
+    std::cout << "-- Training finished ---\n";
+    std::cout << train_conf::iterations << " iterations : " << train_conf::games << " games / iteration\n";
+    std::cout << "Total games played: " << train_conf::iterations * train_conf::games << std::endl;
+    std::cout << "Training time: " << training_time.count() << " s" << std::endl;
     // auto params = player.model.get_parameters();
     // for (auto p: params){
     //     p->show();
