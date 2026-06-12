@@ -3,13 +3,15 @@
 #include "bot.hpp"
 #include "../conf.hpp"
 
-constexpr uint16_t input_size = conf::board_size[0] * conf::board_size[1] * 4;
+constexpr uint16_t input_size = conf::board_size[0] * conf::board_size[1] * 2;
 
 Network buildNetwork(std::string file = ""){
     Network model;
-    model.stackLayer(std::make_shared<Linear>(input_size, 64));
-    model.stackLayer(std::make_shared<ReLU>(64));
-    model.stackLayer(std::make_shared<Linear>(64, 64));
+    model.stackLayer(std::make_shared<Linear>(input_size, 256));
+    model.stackLayer(std::make_shared<ReLU>(256));
+    model.stackLayer(std::make_shared<Linear>(256, 128));
+    model.stackLayer(std::make_shared<ReLU>(128));
+    model.stackLayer(std::make_shared<Linear>(128, 64));
     model.stackLayer(std::make_shared<ReLU>(64));
     model.stackLayer(std::make_shared<Linear>(64, 1));
     model.stackLayer(std::make_shared<Tanh>(1));
@@ -24,7 +26,7 @@ Array<float> toArray(const CheckersBoard& state, short turn = 0){
 
     Array<float> encoded_state {{ input_size }, 0.0f};
     
-    const uint32_t queen_offset = state.size[0] * state.size[1];
+    const uint32_t queen_offset = state.size[0] * state.size[1] / 2;
     const uint32_t player_offset = state.size[0] * state.size[1];
 
     const short friend_pawn = turn;
@@ -35,8 +37,8 @@ Array<float> toArray(const CheckersBoard& state, short turn = 0){
     // top player
     if (turn == 1){
         for (uint16_t i=0; i < state.size[0]; i++){
-            for (uint16_t j=0; j < state.size[1]; j++){
-                const uint32_t idx = i * state.size[1] + j;
+            for (uint16_t j=!(i%2); j < state.size[1]; j+=2){
+                const uint32_t idx = (i * state.size[1] + j) / 2;
                 
                 if (state.board[i][j] == friend_pawn){
                     encoded_state[idx] = 1;
@@ -56,8 +58,8 @@ Array<float> toArray(const CheckersBoard& state, short turn = 0){
     //bottom player
     else {
         for (uint16_t i=0; i < state.size[0]; i++){
-            for (uint16_t j=0; j < state.size[1]; j++){
-                const uint32_t idx = (state.size[0] - i - 1) * state.size[1] + (state.size[1] - 1 - j);
+            for (uint16_t j=!(i%2); j < state.size[1]; j+=2){
+                const uint32_t idx = ((state.size[0] - i - 1) * state.size[1] + (state.size[1] - 1 - j)) / 2;
 
                 if (state.board[i][j] == friend_pawn){
                     encoded_state[idx] = 1;

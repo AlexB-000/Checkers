@@ -6,12 +6,15 @@
 #include "players/checkerZero.hpp"
 
 namespace train_conf{
-    uint32_t iterations = 50;
+    uint32_t iterations = 100;
     uint32_t games = 100;
-    uint32_t replay_batch_size = 50000;
-    uint32_t GDepochs = 5;
+    uint32_t replay_batch_size = 32000;
+    uint32_t GDepochs = 4;
     uint32_t GDbatch_size = 128;
     float lr = 0.01f;
+
+    uint32_t minBufferSize = 100000;
+    uint32_t maxBufferSize = 150000;
 }
 
 void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<float>>& target,
@@ -53,8 +56,6 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
     while (running) {
         count++;
 
-        state_action = toArray(game);
-
         // get the move and the assiociated reward that shoud be learned
         if (game.turn == 1){
             move = player1.move(game, reward);
@@ -69,10 +70,11 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
         // By using the game tree, the algorithm improves the model prediction.
         Array<float> v_target {{1}, reward };
 
+        game.play(move);
+        state_action = toArray(game);
+
         target->push_back(v_target);
         data->push_back(state_action);
-
-        game.play(move);
     }
 }
 
@@ -122,11 +124,16 @@ CheckerZero train(const CheckerZero& starting_player, uint32_t iteratons=100, ui
 
         std::vector<Array<float>> batch_data, batch_target;
         fill_batch(data, target, batch_data, batch_target, replay_batch_size);
-        optimizer.train(batch_data, batch_target, GDepochs, GDbatch_size, lr);
+        optimizer.train(batch_data, batch_target, GDepochs, GDbatch_size, lr, 0, true, true);
 
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::seconds iteration_time = std::chrono::duration_cast<std::chrono::seconds>(end - start);
         std::cout << "\tIteration time : " << iteration_time.count() << " s" << std::endl;
+
+        if (data.size() > train_conf::maxBufferSize){
+            data.erase(data.begin(), data.begin() + (data.size() - train_conf::minBufferSize));
+            target.erase(target.begin(), target.begin() + (target.size() - train_conf::minBufferSize));
+        }
     }
     return player;
 }
