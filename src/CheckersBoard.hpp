@@ -164,7 +164,7 @@ struct CheckersBoard
 
     //MARK: get_eat_moves
     std::vector<mv> get_eat_moves(uint16_t row, uint16_t col,
-        std::vector<std::vector<short>> in_board, std::vector<int>& move_stats) const {
+        std::vector<std::vector<short>>& in_board, std::vector<int>& move_stats) const {
         int best_move = 0;
         std::vector<mv> eat_moves;
 
@@ -252,7 +252,8 @@ struct CheckersBoard
 
     std::vector<mv> get_eat_moves(uint16_t row, uint16_t col) const {
         std::vector<int> move_stats;
-        return get_eat_moves(row, col, board, move_stats);
+        std::vector<std::vector<short>> board_copy = board;
+        return get_eat_moves(row, col, board_copy, move_stats);
     }
 
     std::vector<mv> get_eat_moves(short player) const {
