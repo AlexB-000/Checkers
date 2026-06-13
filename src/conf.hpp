@@ -1,5 +1,7 @@
 #pragma once
 
+using mv = std::vector<uint16_t>;
+
 namespace conf {
     constexpr unsigned int window_size[2] {700, 700};
     constexpr unsigned int board_size[2] {10, 10};

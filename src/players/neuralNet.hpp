@@ -95,9 +95,9 @@ struct NeuralNetPlayer: virtual public Bot{
         return (*this);
     }
 
-    std::vector<std::vector<uint16_t>> getAction(const CheckersBoard& board,
+    mv getAction(const CheckersBoard& board,
         float& q, Array<float>& state_action, float exploration=0.01f, bool show_scores = false) {
-        std::vector<std::vector<std::vector<uint16_t>>> valid_moves = board.get_valid_moves(board.turn);
+        std::vector<mv> valid_moves = board.get_valid_moves(board.turn);
 
         if (valid_moves.size() == 0){
             // final state
@@ -121,7 +121,7 @@ struct NeuralNetPlayer: virtual public Bot{
         std::vector<Array<float>> states (valid_moves.size());
         
         for (uint32_t i=0; i < valid_moves.size(); i++){
-            const std::vector<std::vector<uint16_t>>& move = valid_moves[i];
+            const mv& move = valid_moves[i];
 
             CheckersBoard stateCopy = board;
             stateCopy.play(move);
@@ -144,19 +144,19 @@ struct NeuralNetPlayer: virtual public Bot{
         return valid_moves[idx];
     }
 
-    std::vector<std::vector<uint16_t>> move(const CheckersBoard& board, bool show_q) {
+    mv move(const CheckersBoard& board, bool show_q) {
         float q;
         Array<float> b;
-        std::vector<std::vector<uint16_t>> move = getAction(board, q, b, 0);
+        mv move = getAction(board, q, b, 0);
         if (show_q)
         std::cout << "Q value : " << q << std::endl;
         return move;
     }
 
-    std::vector<std::vector<uint16_t>> move(const CheckersBoard& board) override {
+    mv move(const CheckersBoard& board) override {
         float q;
         Array<float> b;
-        std::vector<std::vector<uint16_t>> move = getAction(board, q, b, 0);
+        mv move = getAction(board, q, b, 0);
         std::cout << "Q value : " << q << std::endl;
         return move;
     }

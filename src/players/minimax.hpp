@@ -42,11 +42,11 @@ struct Minimax: virtual public Bot{
         return false;
     }
 
-    std::vector<std::vector<uint16_t>> minimax(const CheckersBoard& state, short player, float& score, int depth, float alpha, float beta,
+    mv minimax(const CheckersBoard& state, short player, float& score, int depth, float alpha, float beta,
         bool maximizingPlayer, bool pruning) {
 
-        std::vector<std::vector<uint16_t>> result;
-        std::vector<std::vector<std::vector<uint16_t>>> valid_moves = state.get_valid_moves(state.turn);
+        mv result;
+        std::vector<mv> valid_moves = state.get_valid_moves(state.turn);
         
         if (depth == 0 || terminal_node(state)){
             score = score_position(state, player);
@@ -75,7 +75,7 @@ struct Minimax: virtual public Bot{
             score = INFINITY;
         }
 
-        for (const  std::vector<std::vector<uint16_t>>& move: valid_moves){
+        for (const  mv& move: valid_moves){
             CheckersBoard stateCopy = state;
             stateCopy.play(move);
 
@@ -103,9 +103,9 @@ struct Minimax: virtual public Bot{
         return result;
     }
 
-    std::vector<std::vector<uint16_t>> move(const CheckersBoard& board) override {
+    mv move(const CheckersBoard& board) override {
         float score = 0;
-        std::vector<std::vector<uint16_t>> move = minimax(board, player, score, _depth, -INFINITY, INFINITY, true, _prunning);
+        mv move = minimax(board, player, score, _depth, -INFINITY, INFINITY, true, _prunning);
         std::cout << "move score : " << score << "\n";
         return move;
     }

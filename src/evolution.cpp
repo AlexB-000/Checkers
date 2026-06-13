@@ -77,7 +77,7 @@ void repopulate(std::vector<NeuralNetPlayer> population, std::vector<float> scor
 }
 
 void simulate(std::shared_ptr<CheckersBoard> game, NeuralNetPlayer player1, NeuralNetPlayer player2, float* score){
-    std::vector<std::vector<uint16_t>> move;
+    mv move;
 
     for (uint32_t i = 0; i < 500; i++){
         if (game->turn == 1){

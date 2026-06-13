@@ -1,6 +1,10 @@
 #pragma once
-#include "bot.hpp"
 #include <iostream>
+#include <chrono>
+
+#include "../conf.hpp"
+#include "bot.hpp"
+
 struct Node{
     /**
     This class is used to represent nodes of the tree of boards used during
@@ -13,7 +17,7 @@ struct Node{
     CheckersBoard state;
     Node* parent;
     std::vector<Node> children;
-    std::vector<std::vector<std::vector<uint16_t>>> valid_moves;
+    std::vector<mv> valid_moves;
 
     Node(){}
 
@@ -84,7 +88,7 @@ struct MCTS: Bot{
         Bot(inPlayer), _iterations(in_interations), _exploration_parameter(in_exploration_parameter),
         _fixed_calculation_time(in_fixed_calculation_time) {}
 
-    std::vector<std::vector<uint16_t>> monte_carlo_tree_search(
+    mv monte_carlo_tree_search(
         const Node& inRoot, float& reward, short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true
     ){
         /**
@@ -174,7 +178,7 @@ struct MCTS: Bot{
         @return: a newly created child of the current node
         */
 
-        std::vector<std::vector<uint16_t>> move = node.valid_moves[node.children.size()];
+        mv move = node.valid_moves[node.children.size()];
         CheckersBoard new_state = node.state;
         new_state.play(move);
 
@@ -200,13 +204,13 @@ struct MCTS: Bot{
         std::random_device rd;
         std::mt19937 gen(rd());
 
-        std::vector<std::vector<std::vector<uint16_t>>> valid_moves = state.get_valid_moves(turn);
+        std::vector<mv> valid_moves = state.get_valid_moves(turn);
 
         while (!state.checkWin() && valid_moves.size()){
             std::uniform_int_distribution<uint32_t> dis(0, valid_moves.size() - 1);
 
             int move_index = dis(gen);
-            std::vector<std::vector<uint16_t>> move = valid_moves[move_index];
+            mv move = valid_moves[move_index];
 
             state.play(move);
             turn *= -1;
@@ -278,10 +282,10 @@ struct MCTS: Bot{
         return best_children_idx[dis(gen)];
     }
 
-    std::vector<std::vector<uint16_t>> move(const CheckersBoard& board) override {
+    mv move(const CheckersBoard& board) override {
         Node root = Node(board, nullptr);
         float reward;
-        std::vector<std::vector<uint16_t>> chosen_move = monte_carlo_tree_search(root, reward, player, _iterations, _exploration_parameter, _fixed_calculation_time);
+        mv chosen_move = monte_carlo_tree_search(root, reward, player, _iterations, _exploration_parameter, _fixed_calculation_time);
         std::cout << "Chosen move reward : " << reward << "\n";
         return chosen_move;
     }

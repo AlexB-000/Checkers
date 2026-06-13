@@ -45,7 +45,7 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
     CheckerZero player1{1, player};
     CheckerZero player2{-1, player};
 
-    std::vector<std::vector<uint16_t>> move;
+    mv move;
     Array<float> state_action;
 
     float reward;

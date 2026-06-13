@@ -67,8 +67,6 @@ int main(int argc, char* argv[]){
 
     window.display();
 
-    sf::sleep(sf::seconds(conf::delay));
-
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
@@ -101,7 +99,5 @@ int main(int argc, char* argv[]){
         render.draw(window);
 
         window.display();
-
-        sf::sleep(sf::seconds(conf::delay));
     }
 }

@@ -3,15 +3,6 @@
 #include <string>
 #include <random>
 
-bool contains(const std::vector<std::vector<uint16_t>>& vector, const std::vector<uint16_t>& target){
-    for (const std::vector<uint16_t>& element : vector){
-        if (element == target){
-            return true;
-        }
-    }
-    return false;
-};
-
 struct CheckersBoard
 {
     CheckersBoard(uint16_t rows = 10, uint16_t cols = 10){
@@ -90,24 +81,25 @@ struct CheckersBoard
     }
 
     //MARK: play
-    short play(std::vector<std::vector<uint16_t>> move){
-        for (std::vector<uint16_t> & step: move){
-            const uint16_t from_row = step[0];
-            const uint16_t from_col = step[1];
-            const uint16_t to_row = step[2];
-            const uint16_t to_col = step[3];
-
-            board[to_row][to_col] = board[from_row][from_col];
-            board[from_row][from_col] = 0;
+    short play(mv move){
+        uint16_t from_row = move[0];
+        uint16_t from_col = move[1];
+        short piece = board[from_row][from_col];
+        for (uint16_t step = 2; step < move.size(); step+=2){
+            uint16_t to_row = move[step];
+            uint16_t to_col = move[step+1];
             
             int dr = to_row > from_row ? 1 : -1;
             int dc = to_col > from_col ? 1 : -1;
             uint subSteps = std::abs(static_cast<int>(to_row)-static_cast<int>(from_row));
 
-            for (uint32_t i = 0; i < subSteps; i++){
+            for (uint16_t i = 0; i < subSteps; i++){
                 board[from_row + i * dr][from_col + i * dc] = 0;
             }
+            from_row = to_row;
+            from_col = to_col;
         }
+        board[from_row][from_col] = piece;
 
         checkPromotions();
 
@@ -118,8 +110,8 @@ struct CheckersBoard
     }
 
 //MARK: MOVES
-    std::vector<std::vector<std::vector<uint16_t>>> valid_simple_moves(uint16_t row, uint16_t col) const {
-        std::vector<std::vector<std::vector<uint16_t>>> valid_moves;
+    std::vector<mv> valid_simple_moves(uint16_t row, uint16_t col) const {
+        std::vector<mv> valid_moves;
 
         short piece = board[row][col];
         if(piece == 0) return valid_moves; // No piece at the given position
@@ -144,7 +136,7 @@ struct CheckersBoard
                     if(new_row >= size[0] || new_row < 0 || new_col >= size[1] || new_col < 0) break;
 
                     if(board[new_row][new_col] == 0){
-                        valid_moves.push_back(std::vector<std::vector<uint16_t>> {{row, col, new_row, new_col}});
+                        valid_moves.push_back(mv {row, col, new_row, new_col});
 
                     } else break; // Stop if we hit a non-empty square
                 }
@@ -154,8 +146,8 @@ struct CheckersBoard
         return valid_moves;
     }
 
-   std::vector<std::vector<std::vector<uint16_t>>> valid_simple_moves(short player) const {
-        std::vector<std::vector<std::vector<uint16_t>>> all_valid_moves;
+   std::vector<mv> valid_simple_moves(short player) const {
+        std::vector<mv> all_valid_moves;
 
         for(uint16_t r = 0; r < size[0]; ++r){
             for(uint16_t c = 0; c < size[1]; ++c){
@@ -171,10 +163,10 @@ struct CheckersBoard
     }
 
     //MARK: get_eat_moves
-    std::vector<std::vector<std::vector<uint16_t>>> get_eat_moves(uint16_t row, uint16_t col,
+    std::vector<mv> get_eat_moves(uint16_t row, uint16_t col,
         std::vector<std::vector<short>> in_board, std::vector<int>& move_stats) const {
         int best_move = 0;
-        std::vector<std::vector<std::vector<uint16_t>>> eat_moves;
+        std::vector<mv> eat_moves;
 
         short piece = in_board[row][col];
         if(piece == 0) return eat_moves; // No piece at the given position
@@ -200,7 +192,7 @@ struct CheckersBoard
                     if (in_board[target_row][target_col] == 0){
                         if (!pawn) continue;
 
-                        std::vector<std::vector<uint16_t>> move = {{row, col, target_row, target_col}};
+                        mv move = {row, col, target_row, target_col};
 
                         std::vector<std::vector<short>> next_board = in_board;
                         next_board[row][col] = 0;
@@ -208,7 +200,7 @@ struct CheckersBoard
                         next_board[target_row][target_col] = in_board[row][col];
 
                         std::vector<int> next_moves_stats;
-                        std::vector<std::vector<std::vector<uint16_t>>> next_moves =
+                        std::vector<mv> next_moves =
                             get_eat_moves(target_row, target_col, next_board, next_moves_stats);
 
                         if (next_moves.size() == 0){
@@ -222,10 +214,10 @@ struct CheckersBoard
                             }
                         } else {
                             for (uint32_t i = 0; i < next_moves.size(); i++){
-                                const std::vector<std::vector<uint16_t>>& m = next_moves[i];
+                                const mv& m = next_moves[i];
 
-                                std::vector<std::vector<uint16_t>> complete_move = {move[0]};
-                                complete_move.insert(complete_move.end(), m.begin(), m.end());
+                                mv complete_move = move;
+                                complete_move.insert(complete_move.end(), m.begin()+2, m.end());
                                 
                                 int eat_num = 1 + next_moves_stats[i];
                                 if (best_move < eat_num) {
@@ -258,13 +250,13 @@ struct CheckersBoard
         return eat_moves;
     }
 
-    std::vector<std::vector<std::vector<uint16_t>>> get_eat_moves(uint16_t row, uint16_t col) const {
+    std::vector<mv> get_eat_moves(uint16_t row, uint16_t col) const {
         std::vector<int> move_stats;
         return get_eat_moves(row, col, board, move_stats);
     }
 
-    std::vector<std::vector<std::vector<uint16_t>>> get_eat_moves(short player) const {
-        std::vector<std::vector<std::vector<uint16_t>>> eat_moves;
+    std::vector<mv> get_eat_moves(short player) const {
+        std::vector<mv> eat_moves;
 
         for(uint16_t r = 0; r < size[0]; ++r){
             for(uint16_t c = 0; c < size[1]; ++c){
@@ -279,8 +271,8 @@ struct CheckersBoard
         return eat_moves;
     }
 
-    std::vector<std::vector<std::vector<uint16_t>>> get_valid_moves(short player) const {
-        std::vector<std::vector<std::vector<uint16_t>>> valid_moves = get_eat_moves(player);
+    std::vector<mv> get_valid_moves(short player) const {
+        std::vector<mv> valid_moves = get_eat_moves(player);
         if (valid_moves.size()) return valid_moves;
 
         else return valid_simple_moves(player);

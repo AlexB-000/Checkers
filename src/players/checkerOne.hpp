@@ -45,7 +45,7 @@ struct CheckerOne: Bot{
         Bot(inPlayer), model(buildNetwork(file)), _iterations(in_interations), _exploration_parameter(in_exploration_parameter),
         _fixed_calculation_time(in_fixed_calculation_time) {}
 
-    std::vector<std::vector<uint16_t>> DL_tree_search(
+    std::vector<mv> DL_tree_search(
         const Node& inRoot, float& reward,
         short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true,
         bool display=false
@@ -139,7 +139,7 @@ struct CheckerOne: Bot{
         @return: a newly created child of the current node
         */
 
-        std::vector<std::vector<uint16_t>> move = node.valid_moves[node.children.size()];
+        std::vector<mv> move = node.valid_moves[node.children.size()];
         CheckersBoard new_state = node.state;
         new_state.play(move);
 
@@ -225,16 +225,16 @@ struct CheckerOne: Bot{
         return best_children_idx[dis(gen)];
     }
 
-    std::vector<std::vector<uint16_t>> move(const CheckersBoard& board) override {
+    std::vector<mv> move(const CheckersBoard& board) override {
         Node root = Node(board, nullptr);
         float reward;
-        std::vector<std::vector<uint16_t>> chosen_move = DL_tree_search(root, reward,
+        std::vector<mv> chosen_move = DL_tree_search(root, reward,
             player, _iterations, _exploration_parameter, _fixed_calculation_time, true);
         std::cout << "Chosen move reward : " << reward << "\n";
         return chosen_move;
     }
 
-    std::vector<std::vector<uint16_t>> move(const CheckersBoard& board, float& reward) {
+    std::vector<mv> move(const CheckersBoard& board, float& reward) {
         Node root = Node(board, nullptr);
         return DL_tree_search(root, reward, player, _iterations, _exploration_parameter, _fixed_calculation_time);
     }
