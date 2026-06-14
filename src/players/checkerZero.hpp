@@ -22,14 +22,23 @@ struct CheckerZero: Bot{
 
     Node tree {CheckersBoard(), nullptr};
 
-    CheckerZero(const CheckerZero& other) = default;
+    CheckerZero(const CheckerZero& other):
+        Bot(other.player),
+        model(other.model),
+        _iterations(other._iterations),
+        _exploration_parameter(other._exploration_parameter),
+        _fixed_calculation_time(other._fixed_calculation_time) {
+            tree = {CheckersBoard(), nullptr};
+        }
 
     CheckerZero(short inPlayer, const CheckerZero& other): 
         Bot(inPlayer),
         model(other.model),
         _iterations(other._iterations),
         _exploration_parameter(other._exploration_parameter),
-        _fixed_calculation_time(other._fixed_calculation_time) {}
+        _fixed_calculation_time(other._fixed_calculation_time) {
+            tree = {CheckersBoard(), nullptr};
+        }
 
     CheckerZero& operator=(const CheckerZero& other){
         player = other.player;
@@ -37,6 +46,7 @@ struct CheckerZero: Bot{
         _iterations = other._iterations;
         _exploration_parameter = other._exploration_parameter;
         _fixed_calculation_time = other._fixed_calculation_time;
+        tree = {CheckersBoard(), nullptr};
         return (*this);
     }
 

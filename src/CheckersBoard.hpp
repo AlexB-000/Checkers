@@ -82,6 +82,8 @@ struct CheckersBoard
 
     //MARK: play
     short play(mv move){
+        if (move.size() == 0) return winner;
+
         uint16_t from_row = move[0];
         uint16_t from_col = move[1];
         short piece = board[from_row][from_col];
@@ -250,21 +252,24 @@ struct CheckersBoard
         return eat_moves;
     }
 
-    std::vector<mv> get_eat_moves(uint16_t row, uint16_t col) const {
-        std::vector<int> move_stats;
-        std::vector<std::vector<short>> board_copy = board;
-        return get_eat_moves(row, col, board_copy, move_stats);
-    }
-
     std::vector<mv> get_eat_moves(short player) const {
         std::vector<mv> eat_moves;
+
+        uint16_t best_move = 0;
 
         for(uint16_t r = 0; r < size[0]; ++r){
             for(uint16_t c = 0; c < size[1]; ++c){
                 if((player == 1 && board[r][c] > 0) || (player == -1 && board[r][c] < 0)){
-                    auto moves = get_eat_moves(r, c);
-                    for(const auto& move : moves){
-                        eat_moves.push_back(move);
+                    std::vector<std::vector<short>> board_copy = board;
+                    std::vector<int> move_stats;
+                    auto moves = get_eat_moves(r, c, board_copy, move_stats);
+                    if (moves.size() == 0) continue;
+                    if (move_stats[0] > best_move){
+                        best_move = move_stats[0];
+                        eat_moves = moves;
+                    }
+                    else if (move_stats[0] == best_move){
+                        eat_moves.insert(eat_moves.end(), moves.begin(), moves.end());
                     }
                 }
             }

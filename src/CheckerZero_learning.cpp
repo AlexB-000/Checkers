@@ -7,7 +7,7 @@
 
 namespace train_conf{
     uint32_t iterations = 100;
-    uint32_t games = 100;
+    uint32_t games = 10;
     uint32_t replay_batch_size = 32000;
     uint32_t GDepochs = 4;
     uint32_t GDbatch_size = 128;
@@ -68,7 +68,9 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
         }
         // The target V value to learn is the result of running the algorithm and exploring the game tree.
         // By using the game tree, the algorithm improves the model prediction.
-        Array<float> v_target {{1}, reward };
+        // we use (-) the reward because the reward is from the perspective of the player that played the move,
+        // and we want to learn with the input being from the perspective of the player that will play NEXT.
+        Array<float> v_target {{1}, -reward };
 
         game.play(move);
         state_action = toArray(game);

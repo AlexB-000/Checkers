@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-#include <chrono>
 
 #include "../conf.hpp"
 #include "bot.hpp"
@@ -40,17 +39,6 @@ struct Node{
         @param move: move to do to get to the newly added child
         */
         children.push_back( Node(child_state, this) );
-    }
-
-    void update(float reward){
-        /**
-        Update the node's reward (indicates how good a certain node is
-        according to the MCTS algorithm)
-
-        @param reward: reward to be added to the node
-        */
-        reward += reward;
-        visits += 1;
     }
 
     bool fully_explored(){

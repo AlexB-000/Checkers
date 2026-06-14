@@ -22,14 +22,23 @@ struct CheckerOne: Bot{
 
     Node tree {CheckersBoard(), nullptr};
 
-    CheckerOne(const CheckerOne& other) = default;
+    CheckerOne(const CheckerOne& other):
+        Bot(other.player),
+        model(other.model),
+        _iterations(other._iterations),
+        _exploration_parameter(other._exploration_parameter),
+        _fixed_calculation_time(other._fixed_calculation_time) {
+            tree = {CheckersBoard(), nullptr};
+        }
 
     CheckerOne(short inPlayer, const CheckerOne& other): 
         Bot(inPlayer),
         model(other.model),
         _iterations(other._iterations),
         _exploration_parameter(other._exploration_parameter),
-        _fixed_calculation_time(other._fixed_calculation_time) {}
+        _fixed_calculation_time(other._fixed_calculation_time) {
+            tree = {CheckersBoard(), nullptr};
+        }
 
     CheckerOne& operator=(const CheckerOne& other){
         player = other.player;
@@ -37,6 +46,7 @@ struct CheckerOne: Bot{
         _iterations = other._iterations;
         _exploration_parameter = other._exploration_parameter;
         _fixed_calculation_time = other._fixed_calculation_time;
+        tree = {CheckersBoard(), nullptr};
         return (*this);
     }
 
@@ -45,7 +55,7 @@ struct CheckerOne: Bot{
         Bot(inPlayer), model(buildNetwork(file)), _iterations(in_interations), _exploration_parameter(in_exploration_parameter),
         _fixed_calculation_time(in_fixed_calculation_time) {}
 
-    std::vector<mv> DL_tree_search(
+    mv DL_tree_search(
         const Node& inRoot, float& reward,
         short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true,
         bool display=false
@@ -139,7 +149,7 @@ struct CheckerOne: Bot{
         @return: a newly created child of the current node
         */
 
-        std::vector<mv> move = node.valid_moves[node.children.size()];
+        mv move = node.valid_moves[node.children.size()];
         CheckersBoard new_state = node.state;
         new_state.play(move);
 
@@ -182,7 +192,11 @@ struct CheckerOne: Bot{
 
         while (node != nullptr) {
             node->visits += 1;
-            node->reward -= turn * reward;
+            if (turn == 1){
+                node->reward = reward < node->reward ? reward : node->reward;
+            } else {
+                node->reward = reward > node->reward ? reward : node->reward;
+            }
             node = (node->parent);
             turn *= -1;
         }
@@ -203,7 +217,8 @@ struct CheckerOne: Bot{
 
         for (uint32_t i=0; i < node.children.size(); i++){
             const Node& c = node.children[i];
-            float exploitation = c.reward / static_cast<float>(c.visits);
+            // not using the average
+            float exploitation = c.reward;
             float exploration = std::sqrt(std::log2(static_cast<float>(node.visits)) / static_cast<float>(c.visits) );
 
             float score = exploitation + exploration_parameter * exploration;
@@ -225,16 +240,16 @@ struct CheckerOne: Bot{
         return best_children_idx[dis(gen)];
     }
 
-    std::vector<mv> move(const CheckersBoard& board) override {
+    mv move(const CheckersBoard& board) override {
         Node root = Node(board, nullptr);
         float reward;
-        std::vector<mv> chosen_move = DL_tree_search(root, reward,
+        mv chosen_move = DL_tree_search(root, reward,
             player, _iterations, _exploration_parameter, _fixed_calculation_time, true);
         std::cout << "Chosen move reward : " << reward << "\n";
         return chosen_move;
     }
 
-    std::vector<mv> move(const CheckersBoard& board, float& reward) {
+    mv move(const CheckersBoard& board, float& reward) {
         Node root = Node(board, nullptr);
         return DL_tree_search(root, reward, player, _iterations, _exploration_parameter, _fixed_calculation_time);
     }
