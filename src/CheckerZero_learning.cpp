@@ -6,7 +6,7 @@
 #include "players/checkerZero.hpp"
 
 namespace train_conf{
-    uint32_t iterations = 100;
+    uint32_t iterations = 10;
     uint32_t games = 10;
     uint32_t replay_batch_size = 32000;
     uint32_t GDepochs = 4;

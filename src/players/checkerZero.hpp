@@ -101,7 +101,7 @@ struct CheckerZero: Bot{
             short turn;
             Node& node = selection(root, inTurn, turn, exploration_parameter);
             float estimated_reward = estimation(node, turn);
-            backpropagation(&node, estimated_reward, turn);
+            backpropagation(&node, estimated_reward);
         }
 
         uint32_t index = best_child(root, 0);
@@ -173,10 +173,10 @@ struct CheckerZero: Bot{
             Array<float> state_action = toArray(node.state, turn);
             return model.forward(state_action)[0];
         }
-        return node.state.checkWin();
+        return node.state.checkWin() * turn;
     }
 
-    void backpropagation(Node* inNode, float reward, short turn){
+    void backpropagation(Node* inNode, float reward){
         /**
         Update the rewards of all the ancestors of a node. The reward is sometimes
         added and sometimes substracted from the current reward, since it takes
@@ -185,16 +185,15 @@ struct CheckerZero: Bot{
 
         @param node: current node from which we start the backtracking
         @param reward: reward corresponding to that particular node
-        @param turn: 1 or -1 depending on whose turn it is
         */
 
        Node* node = inNode;
 
         while (node != nullptr) {
             node->visits += 1;
-            node->reward -= turn * reward;
+            node->reward -= reward;
             node = (node->parent);
-            turn *= -1;
+            reward *= -1;
         }
         return;
     }
