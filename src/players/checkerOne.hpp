@@ -5,60 +5,39 @@
 
 //MARK: CheckerOne
 struct CheckerOne: Bot{
-    /**
-    This class is responsible for the Monte Carlo Tree Search algorithm.
-    The principle of the algorithm is to perform a series of selection,
-    expansion, random simulation and backpropagation for a number of iterations
-    which is a parameter of the algorithm. A reward system is then implemented based
-    on an exploration parameter (also a parameter of the algorithm), and the best move
-    can be decided based on that. The more iterations, the better the result, but the
-    slower the execution.
-    */
     Network model;
 
     int _iterations;
     float _exploration_parameter;
-    bool _fixed_calculation_time = true;
-
-    Node tree {CheckersBoard(), nullptr};
 
     CheckerOne(const CheckerOne& other):
         Bot(other.player),
         model(other.model),
         _iterations(other._iterations),
-        _exploration_parameter(other._exploration_parameter),
-        _fixed_calculation_time(other._fixed_calculation_time) {
-            tree = {CheckersBoard(), nullptr};
-        }
+        _exploration_parameter(other._exploration_parameter){}
 
     CheckerOne(short inPlayer, const CheckerOne& other): 
         Bot(inPlayer),
         model(other.model),
         _iterations(other._iterations),
-        _exploration_parameter(other._exploration_parameter),
-        _fixed_calculation_time(other._fixed_calculation_time) {
-            tree = {CheckersBoard(), nullptr};
-        }
+        _exploration_parameter(other._exploration_parameter){}
 
     CheckerOne& operator=(const CheckerOne& other){
         player = other.player;
         model = other.model;
         _iterations = other._iterations;
         _exploration_parameter = other._exploration_parameter;
-        _fixed_calculation_time = other._fixed_calculation_time;
-        tree = {CheckersBoard(), nullptr};
         return (*this);
     }
 
     CheckerOne(short inPlayer, std::string file = "",
-        int in_interations=100, float in_exploration_parameter=0, bool in_fixed_calculation_time = true):
-        Bot(inPlayer), model(buildNetwork(file)), _iterations(in_interations), _exploration_parameter(in_exploration_parameter),
-        _fixed_calculation_time(in_fixed_calculation_time) {}
+        int in_interations=100, float in_exploration_parameter=0):
+        Bot(inPlayer), model(buildNetwork(file)),
+        _iterations(in_interations), _exploration_parameter(in_exploration_parameter){}
 
     mv DL_tree_search(
         const Node& inRoot, float& reward,
-        short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true,
-        bool display=false
+        short inTurn, int iterations, float exploration_parameter
     ){
         /**
         Main function of CheckerOne, called whenever a move is needed.
@@ -72,29 +51,9 @@ struct CheckerOne: Bot{
 
         Node root = inRoot;
 
-        for (auto & reuse_state: tree.children){
-            if (reuse_state.state.board == root.state.board){
-                root = reuse_state;
-                break;
-            }
-        }
-
-        root.parent = nullptr;
-        root.update_parents();
-
-        if (root.valid_moves.size() == 0) return {};
-        if (root.valid_moves.size() == 1){
-            if (root.children.size())
-                tree = root.children[0];
-            return root.valid_moves[0];
-        }
-        
-        if (!fixed_calculation_time){
-            iterations = iterations - root.visits;
-        }
-
-        if (display){
-            std::cout << "Recovered state with " << root.visits << " visits\n";
+        if (root.valid_moves.size() == 0){
+            reward = root.state.checkWin() * inTurn;
+            return {};
         }
 
         for (int i = 0; i < iterations; i++){
@@ -105,8 +64,6 @@ struct CheckerOne: Bot{
         }
 
         uint32_t index = best_child(root, 0);
-
-        tree = root.children[index];
 
         reward = root.children[index].reward / static_cast<float>(root.children[index].visits);
         return root.valid_moves[index];
@@ -160,10 +117,6 @@ struct CheckerOne: Bot{
 
     float estimation(Node& node, short turn){
         /**
-        Simulates random moves until the game is won by someone and returns a reward.
-        Until a winning (or losing) situation is obtained, random moves are performed.
-        The reward is then simply 1 in case the winner is the actual player, and -1 otherwise.
-
         @param state: current state from which we should end up finding a winning situation
         @param turn: 1 or -1 depending on whose turn it is
 
@@ -173,7 +126,7 @@ struct CheckerOne: Bot{
             Array<float> state_action = toArray(node.state, turn);
             return model.forward(state_action)[0];
         }
-        return node.state.checkWin();
+        return node.state.checkWin() * turn;
     }
 
     void backpropagation(Node* inNode, float reward, short turn){
@@ -185,7 +138,6 @@ struct CheckerOne: Bot{
 
         @param node: current node from which we start the backtracking
         @param reward: reward corresponding to that particular node
-        @param turn: 1 or -1 depending on whose turn it is
         */
 
        Node* node = inNode;
@@ -217,8 +169,7 @@ struct CheckerOne: Bot{
 
         for (uint32_t i=0; i < node.children.size(); i++){
             const Node& c = node.children[i];
-            // not using the average
-            float exploitation = c.reward;
+            float exploitation = c.reward / static_cast<float>(c.visits);
             float exploration = std::sqrt(std::log2(static_cast<float>(node.visits)) / static_cast<float>(c.visits) );
 
             float score = exploitation + exploration_parameter * exploration;
@@ -244,13 +195,13 @@ struct CheckerOne: Bot{
         Node root = Node(board, nullptr);
         float reward;
         mv chosen_move = DL_tree_search(root, reward,
-            player, _iterations, _exploration_parameter, _fixed_calculation_time, true);
+            player, _iterations, _exploration_parameter);
         std::cout << "Chosen move reward : " << reward << "\n";
         return chosen_move;
     }
 
     mv move(const CheckersBoard& board, float& reward) {
         Node root = Node(board, nullptr);
-        return DL_tree_search(root, reward, player, _iterations, _exploration_parameter, _fixed_calculation_time);
+        return DL_tree_search(root, reward, player, _iterations, _exploration_parameter);
     }
 };

@@ -158,7 +158,7 @@ int main(int argc, char* argv[]){
         }
     }
     
-    CheckerZero player{1, load_file, 1000, 5.0f, true};
+    CheckerZero player{1, load_file, 1000, 5.0f};
 
     auto start = std::chrono::high_resolution_clock::now();
     player = train(player, train_conf::iterations, train_conf::games,

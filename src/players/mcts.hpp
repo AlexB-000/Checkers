@@ -21,7 +21,10 @@ struct Node{
     Node(){}
 
     Node(const CheckersBoard& inState, Node* inParent): state(inState), parent(inParent) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
         valid_moves = state.get_valid_moves(state.turn);
+        std::shuffle(valid_moves.begin(), valid_moves.end(), gen);
     }
 
     void update_parents(){
