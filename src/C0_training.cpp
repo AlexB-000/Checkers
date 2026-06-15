@@ -32,8 +32,8 @@ void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<f
 
     for (uint32_t i = 0; i < batch_size; i++){
         uint32_t idx = dis(gen);
-        batch_data.push_back(data[idx]);
-        batch_target.push_back(target[idx]);
+        batch_data.emplace_back(data[idx]);
+        batch_target.emplace_back(target[idx]);
     }
 }
 
@@ -46,7 +46,7 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
     CheckerZero player2{-1, player};
 
     mv move;
-    Array<float> state_action;
+    Array<float> state;
 
     float reward;
 
@@ -66,17 +66,15 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
         if (move.size() == 0 || game.checkWin() != 0 || count >= conf::moves_to_draw){
             running = false;
         }
+
+        game.play(move);
+        data->emplace_back(toArray(game));
+
         // The target V value to learn is the result of running the algorithm and exploring the game tree.
         // By using the game tree, the algorithm improves the model prediction.
         // we use (-) the reward because the reward is from the perspective of the player that played the move,
         // and we want to learn with the input being from the perspective of the player that will play NEXT.
-        Array<float> v_target {{1}, -reward };
-
-        game.play(move);
-        state_action = toArray(game);
-
-        target->push_back(v_target);
-        data->push_back(state_action);
+        target->emplace_back(std::vector<uint32_t>{1}, -reward);
     }
 }
 

@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <string>
 #include <random>
 
 struct CheckersBoard
@@ -82,7 +81,10 @@ struct CheckersBoard
 
     //MARK: play
     short play(mv move){
-        if (move.size() == 0) return winner;
+        if (move.size() == 0){
+            turn = -turn;
+            return winner;
+        }
 
         uint16_t from_row = move[0];
         uint16_t from_col = move[1];

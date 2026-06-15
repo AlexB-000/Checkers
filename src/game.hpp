@@ -53,8 +53,11 @@ struct CheckersGame: Observable {
 
     //MARK: play
     short play(mv move, const float delay = 0){
-        if (move.size() == 0) return checkBoard.winner;
-        
+        if (move.size() == 0){
+            checkBoard.turn = -checkBoard.turn;
+            return checkBoard.winner;
+        }
+
         // plays a move also using graphical interface
         uint16_t from_row = move[0];
         uint16_t from_col = move[1];

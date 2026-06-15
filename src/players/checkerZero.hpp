@@ -1,7 +1,7 @@
 #pragma once
 #include "bot.hpp"
 #include "neuralNet.hpp"
-#include "mcts.hpp"
+#include "utils/node.hpp"
 
 //MARK: CheckerZero
 struct CheckerZero: Bot{

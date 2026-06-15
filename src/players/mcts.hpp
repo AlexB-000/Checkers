@@ -3,59 +3,7 @@
 
 #include "../conf.hpp"
 #include "bot.hpp"
-
-struct Node{
-    /**
-    This class is used to represent nodes of the tree of boards used during
-    Monte-Carlo Tree Search.
-    */
-
-    unsigned int visits = 0;
-    float reward = 0;
-
-    CheckersBoard state;
-    Node* parent;
-    std::vector<Node> children;
-    std::vector<mv> valid_moves;
-
-    Node(){}
-
-    Node(const CheckersBoard& inState, Node* inParent): state(inState), parent(inParent) {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        valid_moves = state.get_valid_moves(state.turn);
-        std::shuffle(valid_moves.begin(), valid_moves.end(), gen);
-    }
-
-    void update_parents(){
-        for ( Node& child: children ){
-            child.parent = this;
-            child.update_parents();
-        }
-    }
-
-    void add_child(const CheckersBoard& child_state){
-        /**
-        Add a child to the current node.
-
-        @param child_state: state of the child to add
-        @param move: move to do to get to the newly added child
-        */
-        children.push_back( Node(child_state, this) );
-    }
-
-    bool fully_explored(){
-        /**
-        Checks if the node is fully explored (which means we can not add
-        any more children to this node)
-
-        @return True of False depending on if it is fully epxlored or not
-        */
-        if (children.size() == valid_moves.size())
-            return true;
-        return false;
-    }
-};
+#include "utils/node.hpp"
 
 //MARK: MCTS
 struct MCTS: Bot{

@@ -1,7 +1,7 @@
 #pragma once
 #include "bot.hpp"
 #include "neuralNet.hpp"
-#include "mcts.hpp"
+#include "utils/node.hpp"
 
 //MARK: CheckerOne
 struct CheckerOne: Bot{
@@ -54,6 +54,9 @@ struct CheckerOne: Bot{
         if (root.valid_moves.size() == 0){
             reward = root.state.checkWin() * inTurn;
             return {};
+        } else if (root.valid_moves.size() == 1){
+            reward = 0;
+            return root.valid_moves[0];
         }
 
         for (int i = 0; i < iterations; i++){

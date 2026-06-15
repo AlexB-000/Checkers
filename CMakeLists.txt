@@ -17,6 +17,10 @@ FETCHContent_Declare(CppAI
 FetchContent_MakeAvailable(SFML CppAI)
 
 add_executable(checkers src/main.cpp)
+target_sources(checkers
+PRIVATE
+    src/players/utils/node.cpp
+)
 target_compile_features(checkers PRIVATE cxx_std_17)
 target_link_libraries(checkers PRIVATE SFML::Graphics CppAI)
 target_compile_options(checkers PRIVATE -O3)
@@ -31,7 +35,20 @@ target_compile_features(deep_learning PRIVATE cxx_std_17)
 target_link_libraries(deep_learning PRIVATE CppAI)
 target_compile_options(deep_learning PRIVATE -O3)
 
-add_executable(CheckerZero_learning src/CheckerZero_learning.cpp)
-target_compile_features(CheckerZero_learning PRIVATE cxx_std_17)
-target_link_libraries(CheckerZero_learning PRIVATE CppAI)
-target_compile_options(CheckerZero_learning PRIVATE -O3)
+add_executable(C0_training src/C0_training.cpp)
+target_sources(C0_training
+PRIVATE
+    src/players/utils/node.cpp
+)
+target_compile_features(C0_training PRIVATE cxx_std_17)
+target_link_libraries(C0_training PRIVATE CppAI)
+target_compile_options(C0_training PRIVATE -O3)
+
+add_executable(C1_training src/C1_training.cpp)
+target_sources(C1_training
+PRIVATE
+    src/players/utils/node.cpp
+)
+target_compile_features(C1_training PRIVATE cxx_std_17)
+target_link_libraries(C1_training PRIVATE CppAI)
+target_compile_options(C1_training PRIVATE -O3)
