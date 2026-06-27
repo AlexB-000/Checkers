@@ -4,7 +4,9 @@
 struct randomPlayer: Bot{
     randomPlayer(short inPlayer = 1): Bot(inPlayer){}
 
-    mv move(const CheckersBoard& board) override {
+    std::shared_ptr<Player> copy(short inPlayer = 0) override { return std::make_shared<randomPlayer>(*this); }
+
+    mv move(const CheckersBoard& board, bool print) override {
         std::vector<mv> valid_moves = board.get_valid_moves(board.turn);
         if(!valid_moves.empty()){
             //random numbers generator

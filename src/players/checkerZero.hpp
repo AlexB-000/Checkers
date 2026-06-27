@@ -35,6 +35,8 @@ struct CheckerZero: Bot{
         Bot(inPlayer), model(buildNetwork(file)),
         _iterations(in_interations), _exploration_parameter(in_exploration_parameter){}
 
+    std::shared_ptr<Player> copy(short inPlayer = 0) override { return std::make_shared<CheckerZero>(inPlayer, *this); }
+
     mv DL_tree_search(
         const Node& inRoot, float& reward,
         short inTurn, int iterations, float exploration_parameter
@@ -187,12 +189,12 @@ struct CheckerZero: Bot{
         return best_children_idx[dis(gen)];
     }
 
-    mv move(const CheckersBoard& board) override {
+    mv move(const CheckersBoard& board, bool print) override {
         Node root = Node(board, nullptr);
         float reward;
         mv chosen_move = DL_tree_search(root, reward,
             player, _iterations, _exploration_parameter);
-        std::cout << "Chosen move reward : " << reward << "\n";
+        if (print) std::cout << "Chosen move reward : " << reward << "\n";
         return chosen_move;
     }
 

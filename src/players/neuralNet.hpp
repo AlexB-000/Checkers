@@ -95,6 +95,8 @@ struct NeuralNetPlayer: virtual public Bot{
         return (*this);
     }
 
+    std::shared_ptr<Player> copy(short inPlayer = 0) override { return std::make_shared<NeuralNetPlayer>(inPlayer, *this); }
+
     mv getAction(const CheckersBoard& board,
         float& q, Array<float>& state_action, float exploration=0.01f, bool show_scores = false) {
         std::vector<mv> valid_moves = board.get_valid_moves(board.turn);
@@ -144,19 +146,11 @@ struct NeuralNetPlayer: virtual public Bot{
         return valid_moves[idx];
     }
 
-    mv move(const CheckersBoard& board, bool show_q) {
+    mv move(const CheckersBoard& board, bool print) override {
         float q;
         Array<float> b;
         mv move = getAction(board, q, b, 0);
-        if (show_q)
-        std::cout << "Q value : " << q << std::endl;
-        return move;
-    }
-
-    mv move(const CheckersBoard& board) override {
-        float q;
-        Array<float> b;
-        mv move = getAction(board, q, b, 0);
+        if (print)
         std::cout << "Q value : " << q << std::endl;
         return move;
     }

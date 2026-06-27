@@ -1,4 +1,6 @@
 #pragma once
+#include <stdint.h>
+#include <vector>
 
 using mv = std::vector<uint16_t>;
 

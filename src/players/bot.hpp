@@ -3,7 +3,7 @@
 
 struct Bot: public Player{
     Bot(short inPlayer = 1): Player(inPlayer, 1) {}
-    mv move(const CheckersBoard& board) override {
+    mv move(const CheckersBoard& board, bool print) override {
         return mv{};
     }
 };

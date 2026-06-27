@@ -6,7 +6,10 @@ struct Minimax: virtual public Bot{
     bool _prunning;
 
     Minimax(short inPlayer, int inDepth=4, bool inPrunning=true): Bot(inPlayer), _depth(inDepth), _prunning(inPrunning) {}
+    Minimax(short inPlayer, const Minimax& other): Bot(inPlayer), _depth(other._depth), _prunning(other._prunning) {}
     Minimax(const Minimax& other): Bot(other.player), _depth(other._depth), _prunning(other._prunning) {}
+
+    std::shared_ptr<Player> copy(short inPlayer = 0) override { return std::make_shared<Minimax>(inPlayer, *this); }
 
     virtual float score_position(const CheckersBoard& board, short turn) {
         // won
@@ -103,10 +106,10 @@ struct Minimax: virtual public Bot{
         return result;
     }
 
-    mv move(const CheckersBoard& board) override {
+    mv move(const CheckersBoard& board, bool print) override {
         float score = 0;
         mv move = minimax(board, player, score, _depth, -INFINITY, INFINITY, true, _prunning);
-        std::cout << "move score : " << score << "\n";
+        if (print) std::cout << "move score : " << score << "\n";
         return move;
     }
 };

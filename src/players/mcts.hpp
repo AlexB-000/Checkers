@@ -27,6 +27,11 @@ struct MCTS: Bot{
         Bot(inPlayer), _iterations(in_interations), _exploration_parameter(in_exploration_parameter),
         _fixed_calculation_time(in_fixed_calculation_time) {}
 
+    MCTS(short inPlayer, MCTS& other): Bot(inPlayer), _iterations(other._iterations), _exploration_parameter(other._exploration_parameter),
+        _fixed_calculation_time(other._fixed_calculation_time) {}
+
+    std::shared_ptr<Player> copy(short inPlayer = 0) override { return std::make_shared<MCTS>(inPlayer, *this); }
+
     mv monte_carlo_tree_search(
         const Node& inRoot, float& reward, short inTurn, int iterations, float exploration_parameter, bool fixed_calculation_time=true
     ){
@@ -221,11 +226,11 @@ struct MCTS: Bot{
         return best_children_idx[dis(gen)];
     }
 
-    mv move(const CheckersBoard& board) override {
+    mv move(const CheckersBoard& board, bool print) override {
         Node root = Node(board, nullptr);
         float reward;
         mv chosen_move = monte_carlo_tree_search(root, reward, player, _iterations, _exploration_parameter, _fixed_calculation_time);
-        std::cout << "Chosen move reward : " << reward << "\n";
+        if (print) std::cout << "Chosen move reward : " << reward << "\n";
         return chosen_move;
     }
 };

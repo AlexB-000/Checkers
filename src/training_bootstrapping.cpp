@@ -1,20 +1,23 @@
 #include <chrono>
 #include <random>
 #include <thread>
+#include <memory>
 #include "conf.hpp"
 #include "CheckersBoard.hpp"
 #include "players/checkerZero.hpp"
 
+using algo = CheckerZero;
+
 namespace train_conf{
     uint32_t iterations = 10;
     uint32_t games = 10;
-    uint32_t replay_batch_size = 32000;
-    uint32_t GDepochs = 4;
+    uint32_t replay_batch_size = 8000; // 32000
+    uint32_t GDepochs = 2; // 4
     uint32_t GDbatch_size = 128;
-    float lr = 0.01f;
+    float lr = 0.1f;
 
-    uint32_t minBufferSize = 100000;
-    uint32_t maxBufferSize = 150000;
+    uint32_t minBufferSize = 8000; // 100000
+    uint32_t maxBufferSize = 12000; // 150000
 }
 
 void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<float>>& target,
@@ -37,13 +40,69 @@ void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<f
     }
 }
 
+//MARK: save / load replay
+void saveReplayBuffer(const std::vector<Array<float>>& data, const std::vector<Array<float>>& target) {
+    std::ofstream dataFile("../../bootstrap_save/replay_buffer_data.bin", std::ios::binary);
+    std::ofstream targetFile("../../bootstrap_save/replay_buffer_target.bin", std::ios::binary);
+	if (!dataFile) {
+		std::cerr << "WARNING - Error opening file for saving replay buffer data" << std::endl;
+	}
+	if (!targetFile) {
+		std::cerr << "WARNING - Error opening file for saving replay buffer target" << std::endl;
+	}
+    if (!dataFile || !targetFile) return ;
+
+    for (const Array<float>& d : data) {
+        dataFile.write(reinterpret_cast<const char*>(d.data.data()), d.data.size() * sizeof(float));
+    }
+    for (const Array<float>& t : target) {
+        targetFile.write(reinterpret_cast<const char*>(t.data.data()), t.data.size() * sizeof(float));
+    }
+    std::cout << "Successfully saved replay buffer" << std::endl;
+}
+
+void loadReplayBuffer(std::vector<Array<float>>& data, std::vector<Array<float>>& target) {
+    std::ifstream dataFile("../../bootstrap_save/replay_buffer_data.bin", std::ios::binary);
+    std::ifstream targetFile("../../bootstrap_save/replay_buffer_target.bin", std::ios::binary);
+	if (!dataFile) {
+		std::cerr << "WARNING - Error opening file for loading replay buffer data" << std::endl;
+	}
+	if (!targetFile) {
+		std::cerr << "WARNING - Error opening file for loading replay buffer target" << std::endl;
+	}
+    if (!dataFile || !targetFile) return ;
+
+    while (dataFile.peek() != EOF) {
+        Array<float> d(std::vector<uint32_t>{input_size});
+        dataFile.read(reinterpret_cast<char*>(d.data.data()), sizeof(float)*input_size);
+        data.push_back(d);
+    }
+    while (targetFile.peek() != EOF) {
+        Array<float> t(std::vector<uint32_t>{1});
+        targetFile.read(reinterpret_cast<char*>(t.data.data()), sizeof(float));
+        target.push_back(t);
+    }
+    if (data.size() != target.size()){
+        std::cout << "WARNING - size mismatch between data and targets of the replay buffer. Part of the information will be lost" <<
+                    "\ndata size : " << data.size() << " | target size : " << target.size() << std::endl;
+        uint32_t size = std::min(data.size(), target.size());
+        data.resize(size);
+        target.resize(size);
+    }
+    else if (target.size() == 0){
+        std::cout << "WARNING - could not load replay buffer : empty files" << std::endl;
+    } else {
+        std::cout << "Successfully loaded replay buffer" << std::endl;
+    }
+}
+
 void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target,
-    const CheckerZero& player){
+    const algo& player){
 
     CheckersBoard game {conf::board_size[0], conf::board_size[1]};
     
-    CheckerZero player1{1, player};
-    CheckerZero player2{-1, player};
+    algo player1{1, player};
+    algo player2{-1, player};
 
     mv move;
     Array<float> state;
@@ -79,7 +138,7 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
 }
 
 void collect_data(std::vector<Array<float>>& data, std::vector<Array<float>>& target,
-    const CheckerZero& player, uint32_t games=100){
+    const algo& player, uint32_t games=100){
 
     std::vector<std::vector<Array<float>>> data_threads (games);
     std::vector<std::vector<Array<float>>> target_threads (games);
@@ -99,10 +158,10 @@ void collect_data(std::vector<Array<float>>& data, std::vector<Array<float>>& ta
     }
 }
 
-CheckerZero train(const CheckerZero& starting_player, uint32_t iteratons=100, uint32_t games=100,
+algo train(bool loadReplay, const algo& starting_player, uint32_t iteratons=100, uint32_t games=100,
     uint32_t replay_batch_size=10000, uint32_t GDepochs=10, uint32_t GDbatch_size=128, float lr=0.01f){
     
-    CheckerZero player{1, starting_player};
+    algo player{1, starting_player};
 
     CheckersBoard game {conf::board_size[0], conf::board_size[1]};
 
@@ -110,6 +169,9 @@ CheckerZero train(const CheckerZero& starting_player, uint32_t iteratons=100, ui
     GD optimizer(&player.model, &loss);
 
     std::vector<Array<float>> data, target;
+    if (loadReplay){
+        loadReplayBuffer(data, target);
+    }
 
     for(uint32_t i = 0; i < iteratons; i++){
         std::cout << "Iteration " << i+1 << "/" << iteratons << std::endl;
@@ -124,7 +186,7 @@ CheckerZero train(const CheckerZero& starting_player, uint32_t iteratons=100, ui
 
         std::vector<Array<float>> batch_data, batch_target;
         fill_batch(data, target, batch_data, batch_target, replay_batch_size);
-        optimizer.train(batch_data, batch_target, GDepochs, GDbatch_size, lr, 0, true, true);
+        optimizer.train(batch_data, batch_target, GDepochs, GDbatch_size, lr, 2, true, true);
 
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::seconds iteration_time = std::chrono::duration_cast<std::chrono::seconds>(end - start);
@@ -135,6 +197,7 @@ CheckerZero train(const CheckerZero& starting_player, uint32_t iteratons=100, ui
             target.erase(target.begin(), target.begin() + (target.size() - train_conf::minBufferSize));
         }
     }
+    saveReplayBuffer(data, target);
     return player;
 }
 
@@ -155,11 +218,18 @@ int main(int argc, char* argv[]){
             save_file = std::string(argv[4]);
         }
     }
+
+    std::string load_str;
+    std::cout << "load buffer ? (y/n) ";
+    std::cin >> load_str;
+    bool loadReplay = false;
+    if (load_str == "y")
+        loadReplay = true;
     
-    CheckerZero player{1, load_file, 1000, 5.0f};
+    algo player{1, load_file, 1000, 5.0f};
 
     auto start = std::chrono::high_resolution_clock::now();
-    player = train(player, train_conf::iterations, train_conf::games,
+    player = train(loadReplay, player, train_conf::iterations, train_conf::games,
                     train_conf::replay_batch_size, train_conf::GDepochs, train_conf::GDbatch_size, train_conf::lr);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::seconds training_time = std::chrono::duration_cast<std::chrono::seconds>(end - start);

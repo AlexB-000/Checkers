@@ -16,7 +16,7 @@ FETCHContent_Declare(CppAI
 )
 FetchContent_MakeAvailable(SFML CppAI)
 
-add_executable(checkers src/main.cpp)
+add_executable(checkers src/UI_checkers.cpp)
 target_sources(checkers
 PRIVATE
     src/players/utils/node.cpp
@@ -24,6 +24,16 @@ PRIVATE
 target_compile_features(checkers PRIVATE cxx_std_17)
 target_link_libraries(checkers PRIVATE SFML::Graphics CppAI)
 target_compile_options(checkers PRIVATE -O3)
+
+add_executable(compete src/UI_competition.cpp)
+target_sources(compete
+PRIVATE
+    src/players/utils/node.cpp
+    src/competition.cpp
+)
+target_compile_features(compete PRIVATE cxx_std_17)
+target_link_libraries(compete PRIVATE SFML::Graphics CppAI)
+target_compile_options(compete PRIVATE -O3)
 
 add_executable(evolution src/evolution.cpp)
 target_compile_features(evolution PRIVATE cxx_std_17)
@@ -35,20 +45,20 @@ target_compile_features(deep_learning PRIVATE cxx_std_17)
 target_link_libraries(deep_learning PRIVATE CppAI)
 target_compile_options(deep_learning PRIVATE -O3)
 
-add_executable(C0_training src/C0_training.cpp)
-target_sources(C0_training
+add_executable(train_bootstrap src/training_bootstrapping.cpp)
+target_sources(train_bootstrap
 PRIVATE
     src/players/utils/node.cpp
 )
-target_compile_features(C0_training PRIVATE cxx_std_17)
-target_link_libraries(C0_training PRIVATE CppAI)
-target_compile_options(C0_training PRIVATE -O3)
+target_compile_features(train_bootstrap PRIVATE cxx_std_17)
+target_link_libraries(train_bootstrap PRIVATE CppAI)
+target_compile_options(train_bootstrap PRIVATE -O3)
 
-add_executable(C1_training src/C1_training.cpp)
-target_sources(C1_training
+add_executable(train_raw src/training_rawresult.cpp)
+target_sources(train_raw
 PRIVATE
     src/players/utils/node.cpp
 )
-target_compile_features(C1_training PRIVATE cxx_std_17)
-target_link_libraries(C1_training PRIVATE CppAI)
-target_compile_options(C1_training PRIVATE -O3)
+target_compile_features(train_raw PRIVATE cxx_std_17)
+target_link_libraries(train_raw PRIVATE CppAI)
+target_compile_options(train_raw PRIVATE -O3)
