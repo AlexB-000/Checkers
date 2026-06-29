@@ -9,15 +9,15 @@
 using algo = CheckerZero;
 
 namespace train_conf{
-    uint32_t iterations = 10;
+    uint32_t iterations = 30;
     uint32_t games = 10;
-    uint32_t replay_batch_size = 8000; // 32000
-    uint32_t GDepochs = 2; // 4
+    uint32_t replay_batch_size = 32000;
+    uint32_t GDepochs = 4;
     uint32_t GDbatch_size = 128;
     float lr = 0.1f;
 
-    uint32_t minBufferSize = 8000; // 100000
-    uint32_t maxBufferSize = 12000; // 150000
+    uint32_t minBufferSize = 100000;
+    uint32_t maxBufferSize = 150000;
 }
 
 void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<float>>& target,

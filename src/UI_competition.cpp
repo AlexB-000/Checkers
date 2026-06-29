@@ -30,7 +30,7 @@ void printWinStats(const std::vector<std::vector<std::vector<float>>>& winStats,
 
 
     std::string cell_spaces = "";
-    for (uint32_t i=13 + 2 + 3 + 2; i<spacing; i++) spaces += " ";
+    for (uint32_t i=13 + 2 + 3 + 2; i<spacing; i++) cell_spaces += " ";
 
     for (uint32_t i=0; i < winStats.size(); i++){
         for (uint32_t line=0; line<3; line++){
