@@ -45,7 +45,7 @@ void simulate(std::vector<Array<float>>* data, std::vector<Array<float>>* target
     NeuralNetPlayer player2{-1, player};
 
     mv move;
-    Array<float> state_action;
+    Array<float> state_action{{input_size}, 0.0f};
     float v1, v2, v1_next, v2_next;
     float reward = 0.0f;
 

@@ -12,7 +12,7 @@ FetchContent_Declare(SFML
     SYSTEM)
 FETCHContent_Declare(CppAI
     GIT_REPOSITORY https://github.com/AlexB-000/Cpp_AI_lib.git
-    GIT_TAG main
+    GIT_TAG fastest
 )
 FetchContent_MakeAvailable(SFML CppAI)
 

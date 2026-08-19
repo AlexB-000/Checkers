@@ -15,9 +15,9 @@ Network crossover(Network& parent1, Network& parent2){
 
     for (uint32_t i = 0; i < parameters.size(); i++){
         Array<float>* param = parameters[i];
-        for (uint32_t j = 0; j < (*param).data.size(); j++){
+        for (uint32_t j = 0; j < (*(*param).data_ptr).size(); j++){
             if (dist(gen)){
-                (*param).data[j] = (*parent2_parameters[i]).data[j];
+                (*(*param).data_ptr)[j] = (*(*parent2_parameters[i]).data_ptr)[j];
             }
         }
     }
@@ -37,9 +37,9 @@ void mutate(Network& individual, const float mutation_rate=0.01,
 
     for (uint32_t i = 0; i < parameters.size(); i++){
         Array<float>* param = parameters[i];
-        for (uint32_t j = 0; j < (*param).data.size(); j++){
+        for (uint32_t j = 0; j < (*(*param).data_ptr).size(); j++){
             if (dist(gen) <= mutation_rate){
-                (*param).data[j] = new_values_dist(gen);
+                (*(*param).data_ptr)[j] = new_values_dist(gen);
             }
         }
     }

@@ -129,7 +129,7 @@ struct CheckerOne: Bot{
         */        
         if (node.valid_moves.size() > 0){
             Array<float> state_action = toArray(node.state, turn);
-            return model.forward(state_action)[0];
+            return model.forward(state_action).at(0);
         }
         return node.state.checkWin() * turn;
     }

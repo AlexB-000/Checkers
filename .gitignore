@@ -1,6 +1,7 @@
 .vscode/
 build
 bootstrap_save/*
+raw_save/*
 
 # Prerequisites
 *.d

@@ -53,17 +53,17 @@ void saveReplayBuffer(const std::vector<Array<float>>& data, const std::vector<A
     if (!dataFile || !targetFile) return ;
 
     for (const Array<float>& d : data) {
-        dataFile.write(reinterpret_cast<const char*>(d.data.data()), d.data.size() * sizeof(float));
+        dataFile.write(reinterpret_cast<const char*>((*d.data_ptr).data()), (*d.data_ptr).size() * sizeof(float));
     }
     for (const Array<float>& t : target) {
-        targetFile.write(reinterpret_cast<const char*>(t.data.data()), t.data.size() * sizeof(float));
+        targetFile.write(reinterpret_cast<const char*>((*t.data_ptr).data()), (*t.data_ptr).size() * sizeof(float));
     }
     std::cout << "Successfully saved replay buffer" << std::endl;
 }
 
 void loadReplayBuffer(std::vector<Array<float>>& data, std::vector<Array<float>>& target) {
-    std::ifstream dataFile("../../bootstrap_save/replay_buffer_data.bin", std::ios::binary);
-    std::ifstream targetFile("../../bootstrap_save/replay_buffer_target.bin", std::ios::binary);
+    std::ifstream dataFile("../../raw_save/replay_buffer_data.bin", std::ios::binary);
+    std::ifstream targetFile("../../raw_save/replay_buffer_target.bin", std::ios::binary);
 	if (!dataFile) {
 		std::cerr << "WARNING - Error opening file for loading replay buffer data" << std::endl;
 	}
@@ -74,20 +74,20 @@ void loadReplayBuffer(std::vector<Array<float>>& data, std::vector<Array<float>>
 
     while (dataFile.peek() != EOF) {
         Array<float> d(std::vector<uint32_t>{input_size});
-        dataFile.read(reinterpret_cast<char*>(d.data.data()), sizeof(float)*input_size);
+        dataFile.read(reinterpret_cast<char*>((*d.data_ptr).data()), sizeof(float)*input_size);
         data.push_back(d);
     }
     while (targetFile.peek() != EOF) {
         Array<float> t(std::vector<uint32_t>{1});
-        targetFile.read(reinterpret_cast<char*>(t.data.data()), sizeof(float));
+        targetFile.read(reinterpret_cast<char*>((*t.data_ptr).data()), sizeof(float));
         target.push_back(t);
     }
     if (data.size() != target.size()){
         std::cout << "WARNING - size mismatch between data and targets of the replay buffer. Part of the information will be lost" <<
-                    "data size : " << data.size() << " | target size : " << target.size() << std::endl;
+                    "\ndata size : " << data.size() << " | target size : " << target.size() << std::endl;
         uint32_t size = std::min(data.size(), target.size());
-        data.resize(size);
-        target.resize(size);
+        data.resize(size, Array<float>{{input_size}, 0.0f});
+        target.resize(size, Array<float>{{1}, 0.0f});
     }
     else if (target.size() == 0){
         std::cout << "WARNING - could not load replay buffer : empty files" << std::endl;

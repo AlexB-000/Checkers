@@ -115,20 +115,20 @@ struct NeuralNetPlayer: virtual public Bot{
             std::uniform_int_distribution<uint32_t> dis_move(0, valid_moves.size() - 1);
             uint32_t idx = dis_move(gen);
             state_action = toArray(board);
-            q = model.forward(state_action)[0];
+            q = model.forward(state_action).at(0);
             return valid_moves[idx];
         }
 
         std::vector<float> scores (valid_moves.size(), 0.0f);
-        std::vector<Array<float>> states (valid_moves.size());
-        
+        std::vector<Array<float>> states;
+        states.reserve(valid_moves.size());
         for (uint32_t i=0; i < valid_moves.size(); i++){
             const mv& move = valid_moves[i];
 
             CheckersBoard stateCopy = board;
             stateCopy.play(move);
-            states[i] = toArray(stateCopy);
-            scores[i] = model.forward(states[i]) [0];
+            states.emplace_back(toArray(stateCopy));
+            scores.emplace_back(model.forward(states[i]).at(0));
             if (show_scores) std::cout << scores[i] << " ";
         }
         if (show_scores) std::cout << std::endl;
@@ -148,7 +148,7 @@ struct NeuralNetPlayer: virtual public Bot{
 
     mv move(const CheckersBoard& board, bool print) override {
         float q;
-        Array<float> b;
+        Array<float> b{{input_size}, 0.0f};
         mv move = getAction(board, q, b, 0);
         if (print)
         std::cout << "Q value : " << q << std::endl;
