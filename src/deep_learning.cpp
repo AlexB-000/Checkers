@@ -153,7 +153,7 @@ NeuralNetPlayer train(const NeuralNetPlayer& starting_player, uint32_t iteratons
     CheckersBoard game {conf::board_size[0], conf::board_size[1]};
 
     MSELoss loss {1};
-    GD optimizer(&player.model, &loss);
+    SGD optimizer(&player.model, &loss, 0.0f, 0.9f);
 
     std::vector<Array<float>> data, target;
 

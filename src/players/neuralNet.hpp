@@ -114,7 +114,11 @@ struct NeuralNetPlayer: virtual public Bot{
             // exploration : we choose a random move
             std::uniform_int_distribution<uint32_t> dis_move(0, valid_moves.size() - 1);
             uint32_t idx = dis_move(gen);
-            state_action = toArray(board);
+            
+            CheckersBoard stateCopy = board;
+            stateCopy.play(valid_moves[idx]);
+            state_action = toArray(stateCopy);
+
             q = model.forward(state_action).at(0);
             return valid_moves[idx];
         }

@@ -9,15 +9,16 @@
 using algo = CheckerZero;
 
 namespace train_conf{
-    uint32_t iterations = 10;
-    uint32_t games = 10;
-    uint32_t replay_batch_size = 32000;
-    uint32_t GDepochs = 4;
-    uint32_t GDbatch_size = 128;
-    float lr = 0.1f;
+    constexpr uint32_t iterations = 10;
+    constexpr uint32_t games = 10;
+    constexpr uint32_t replay_batch_size = 32000;
+    constexpr uint32_t GDepochs = 4;
+    constexpr uint32_t GDbatch_size = 128;
+    constexpr float lr = 0.01f;
+    constexpr float momentum = 0.9f;
 
-    uint32_t minBufferSize = 100000;
-    uint32_t maxBufferSize = 150000;
+    constexpr uint32_t minBufferSize = 100000;
+    constexpr uint32_t maxBufferSize = 150000;
 }
 
 void fill_batch(const std::vector<Array<float>>& data, const std::vector<Array<float>>& target,
@@ -166,7 +167,7 @@ algo train(bool loadReplay, const algo& starting_player, uint32_t iteratons=100,
     CheckersBoard game {conf::board_size[0], conf::board_size[1]};
 
     MSELoss loss {1};
-    GD optimizer(&player.model, &loss);
+    SGD optimizer(&player.model, &loss, 0.0f, train_conf::momentum);
 
     std::vector<Array<float>> data, target;
     if (loadReplay){
