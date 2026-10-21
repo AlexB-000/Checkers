@@ -1,6 +1,6 @@
 #include <random>
 #include <thread>
-#include "conf.hpp"
+#include "configuration.hpp"
 #include "CheckersBoard.hpp"
 #include "players/neuralNet.hpp"
 

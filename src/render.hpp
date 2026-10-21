@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "utils.hpp"
-#include "conf.hpp"
+#include "configuration.hpp"
 #include "game.hpp"
 
 static const sf::Color Grid_White {150, 100, 60};

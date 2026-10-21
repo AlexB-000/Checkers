@@ -1,6 +1,6 @@
 #include "competition.hpp"
 
-short simulate(std::shared_ptr<Player> player1, std::shared_ptr<Player> player2){
+void simulate(std::shared_ptr<Player> player1, std::shared_ptr<Player> player2, short* winner){
     CheckersBoard game {conf::board_size[0], conf::board_size[1]};
     mv move;
     // run the game
@@ -22,7 +22,7 @@ short simulate(std::shared_ptr<Player> player1, std::shared_ptr<Player> player2)
 
         game.play(move);
     }
-    return game.winner;
+    *winner = game.winner;
 }
 
 std::vector<std::vector<std::vector<float>>> compete(const std::vector<std::shared_ptr<Player>>& players, uint32_t games){
@@ -30,10 +30,19 @@ std::vector<std::vector<std::vector<float>>> compete(const std::vector<std::shar
     for (uint32_t i=0; i < players.size(); i++){
         for (uint32_t j=0; j < players.size(); j++){
             if (i==j) break;
+            std::vector<short> winners (games, 0.0f);
+
+            std::vector<std::thread> threads;
+            threads.reserve(games);
             for (uint32_t g=0; g<games; g++){
-                short winner = simulate(players[i]->copy(1), players[j]->copy(-1));
-                if (winner == 1) winStats[i][j][0] += 1;
-                else if (winner == 0) winStats[i][j][1] += 1;
+                threads.emplace_back(&simulate, players[i]->copy(1), players[j]->copy(-1), &winners[g]);
+            }
+            for (std::thread& t : threads){
+                t.join();
+            }
+            for (uint32_t g=0; g<games; g++){
+                if (winners[g] == 1) winStats[i][j][0] += 1;
+                else if (winners[g] == 0) winStats[i][j][1] += 1;
                 else winStats[i][j][2] += 1;
             }
             winStats[i][j][0] /= games;

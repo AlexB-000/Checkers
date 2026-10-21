@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 
-#include "conf.hpp"
+#include "configuration.hpp"
 #include "render.hpp"
 #include "game.hpp"
 #include "players/randomPlayer.hpp"

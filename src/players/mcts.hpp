@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-#include "../conf.hpp"
+#include "../configuration.hpp"
 #include "bot.hpp"
 #include "utils/node.hpp"
 

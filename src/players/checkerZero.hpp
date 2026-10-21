@@ -1,7 +1,7 @@
 #pragma once
 #include "bot.hpp"
-#include "neuralNet.hpp"
 #include "utils/node.hpp"
+#include "utils/netUtils.hpp"
 
 //MARK: CheckerZero
 struct CheckerZero: Bot{
@@ -119,14 +119,15 @@ struct CheckerZero: Bot{
 
     float estimation(Node& node, short turn){
         /**
-        @param state: current state from which we should end up finding a winning situation
+        @param state: current state from which we should guess the winner
         @param turn: 1 or -1 depending on whose turn it is
 
         @return: a reward
-        */        
+        */
+        if (node.state.winner != 0) return node.state.winner * turn;
         if (node.valid_moves.size() > 0){
             Array<float> state_action = toArray(node.state, turn);
-            return model.forward(state_action).at(0);
+            return (*model.forward(state_action).data_ptr)[0];
         }
         return node.state.checkWin() * turn;
     }

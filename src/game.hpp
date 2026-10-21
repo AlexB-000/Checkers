@@ -3,7 +3,7 @@
 #include <thread>
 #include <chrono>
 
-#include "conf.hpp"
+#include "configuration.hpp"
 #include "utils.hpp"
 #include "players/player.hpp"
 #include "CheckersBoard.hpp"

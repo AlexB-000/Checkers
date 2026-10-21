@@ -3,7 +3,7 @@
 #include <random>
 #include <algorithm>
 
-#include "../../conf.hpp"
+#include "../../configuration.hpp"
 #include "../../CheckersBoard.hpp"
 
 struct Node{

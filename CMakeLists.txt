@@ -20,6 +20,7 @@ add_executable(checkers src/UI_checkers.cpp)
 target_sources(checkers
 PRIVATE
     src/players/utils/node.cpp
+    src/players/utils/netUtils.cpp
 )
 target_compile_features(checkers PRIVATE cxx_std_17)
 target_link_libraries(checkers PRIVATE SFML::Graphics CppAI)
@@ -29,6 +30,7 @@ add_executable(compete src/UI_competition.cpp)
 target_sources(compete
 PRIVATE
     src/players/utils/node.cpp
+    src/players/utils/netUtils.cpp
     src/competition.cpp
 )
 target_compile_features(compete PRIVATE cxx_std_17)
@@ -36,29 +38,29 @@ target_link_libraries(compete PRIVATE SFML::Graphics CppAI)
 target_compile_options(compete PRIVATE -O3)
 
 add_executable(evolution src/evolution.cpp)
+target_sources(evolution
+PRIVATE
+    src/players/utils/netUtils.cpp
+)
 target_compile_features(evolution PRIVATE cxx_std_17)
 target_link_libraries(evolution PRIVATE CppAI)
 target_compile_options(evolution PRIVATE -O3)
 
-add_executable(deep_learning src/deep_learning.cpp)
-target_compile_features(deep_learning PRIVATE cxx_std_17)
-target_link_libraries(deep_learning PRIVATE CppAI)
-target_compile_options(deep_learning PRIVATE -O3)
+add_executable(basic_train src/basicNetTraining.cpp)
+target_sources(basic_train
+PRIVATE
+    src/players/utils/netUtils.cpp
+)
+target_compile_features(basic_train PRIVATE cxx_std_17)
+target_link_libraries(basic_train PRIVATE CppAI)
+target_compile_options(basic_train PRIVATE -O3)
 
-add_executable(train_bootstrap src/training_bootstrapping.cpp)
-target_sources(train_bootstrap
+add_executable(train src/training.cpp)
+target_sources(train
 PRIVATE
     src/players/utils/node.cpp
+    src/players/utils/netUtils.cpp
 )
-target_compile_features(train_bootstrap PRIVATE cxx_std_17)
-target_link_libraries(train_bootstrap PRIVATE CppAI)
-target_compile_options(train_bootstrap PRIVATE -O3)
-
-add_executable(train_raw src/training_rawresult.cpp)
-target_sources(train_raw
-PRIVATE
-    src/players/utils/node.cpp
-)
-target_compile_features(train_raw PRIVATE cxx_std_17)
-target_link_libraries(train_raw PRIVATE CppAI)
-target_compile_options(train_raw PRIVATE -O3)
+target_compile_features(train PRIVATE cxx_std_17)
+target_link_libraries(train PRIVATE CppAI)
+target_compile_options(train PRIVATE -O3)

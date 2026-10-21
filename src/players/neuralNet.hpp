@@ -1,84 +1,8 @@
 #pragma once
 #include "CppAI/Cpp_AI.hpp"
+#include "../configuration.hpp"
 #include "bot.hpp"
-#include "../conf.hpp"
-
-constexpr uint16_t input_size = conf::board_size[0] * conf::board_size[1] * 2;
-
-Network buildNetwork(std::string file = ""){
-    Network model;
-    model.stackLayer(std::make_shared<Linear>(input_size, 256));
-    model.stackLayer(std::make_shared<ReLU>(256));
-    model.stackLayer(std::make_shared<Linear>(256, 128));
-    model.stackLayer(std::make_shared<ReLU>(128));
-    model.stackLayer(std::make_shared<Linear>(128, 64));
-    model.stackLayer(std::make_shared<ReLU>(64));
-    model.stackLayer(std::make_shared<Linear>(64, 1));
-    model.stackLayer(std::make_shared<Tanh>(1));
-    if (file != "") {
-        model.load(file);
-    }
-    return model;
-}
-
-Array<float> toArray(const CheckersBoard& state, short turn = 0){
-    if (turn == 0) turn = state.turn;
-
-    Array<float> encoded_state {{ input_size }, 0.0f};
-    
-    const uint32_t queen_offset = state.size[0] * state.size[1] / 2;
-    const uint32_t player_offset = state.size[0] * state.size[1];
-
-    const short friend_pawn = turn;
-    const short enemy_pawn = -turn;
-    const short friend_queen = turn * 2;
-    const short enemy_queen = -friend_queen;
-
-    // top player
-    if (turn == 1){
-        for (uint16_t i=0; i < state.size[0]; i++){
-            for (uint16_t j=!(i%2); j < state.size[1]; j+=2){
-                const uint32_t idx = (i * state.size[1] + j) / 2;
-                
-                if (state.board[i][j] == friend_pawn){
-                    encoded_state[idx] = 1;
-
-                } else if (state.board[i][j] == friend_queen){
-                    encoded_state[idx + queen_offset ] = 1;
-
-                } else if (state.board[i][j] == enemy_pawn){
-                    encoded_state[idx + player_offset ] = 1;
-
-                } else if (state.board[i][j] == enemy_queen){
-                    encoded_state[idx + queen_offset + player_offset ] = 1;
-                }
-            }
-        }
-    }
-    //bottom player
-    else {
-        for (uint16_t i=0; i < state.size[0]; i++){
-            for (uint16_t j=!(i%2); j < state.size[1]; j+=2){
-                const uint32_t idx = ((state.size[0] - i - 1) * state.size[1] + (state.size[1] - 1 - j)) / 2;
-
-                if (state.board[i][j] == friend_pawn){
-                    encoded_state[idx] = 1;
-
-                } else if (state.board[i][j] == friend_queen){
-                    encoded_state[idx + queen_offset ] = 1;
-
-                } else if (state.board[i][j] == enemy_pawn){
-                    encoded_state[idx + player_offset ] = 1;
-
-                } else if (state.board[i][j] == enemy_queen){
-                    encoded_state[idx + queen_offset + player_offset ] = 1;
-                }
-            }
-        }
-    }
-    
-    return encoded_state;
-}
+#include "utils/netUtils.hpp"
 
 struct NeuralNetPlayer: virtual public Bot{
     Network model;
@@ -119,7 +43,7 @@ struct NeuralNetPlayer: virtual public Bot{
             stateCopy.play(valid_moves[idx]);
             state_action = toArray(stateCopy);
 
-            q = model.forward(state_action).at(0);
+            q = (*model.forward(state_action).data_ptr)[0];
             return valid_moves[idx];
         }
 
@@ -132,7 +56,7 @@ struct NeuralNetPlayer: virtual public Bot{
             CheckersBoard stateCopy = board;
             stateCopy.play(move);
             states.emplace_back(toArray(stateCopy));
-            scores.emplace_back(model.forward(states[i]).at(0));
+            scores.emplace_back((*model.forward(states[i]).data_ptr)[0]);
             if (show_scores) std::cout << scores[i] << " ";
         }
         if (show_scores) std::cout << std::endl;

@@ -1,4 +1,4 @@
-#include "conf.hpp"
+#include "configuration.hpp"
 #include "competition.hpp"
 #include "players/randomPlayer.hpp"
 #include "players/humanPlayer.hpp"
@@ -47,11 +47,11 @@ void printWinStats(const std::vector<std::vector<std::vector<float>>>& winStats,
             for (uint32_t j=0; j < winStats.size(); j++){
                 if (i==j) break;
                 if (line==0){
-                    std::cout << "Win rate :  ";
+                    std::cout << "Line win rate :  ";
                 } else if (line==1){
                     std::cout << "Draw rate : ";
                 } else {
-                    std::cout << "Lose rate : ";
+                    std::cout << "Col win rate : ";
                 }
                 std::cout << winStats[i][j][line] << " %" << cell_spaces;
             }
@@ -84,32 +84,32 @@ int main(int argc, char* argv[]){
     uint argIdx = 0;
     while (argIdx < argc){
         if (std::string(argv[argIdx]) == "human"){
+            names.emplace_back(std::to_string(names.size()+1) + ".human");
             players.emplace_back(std::make_shared<HumanPlayer>(1));
-            names.emplace_back("human");
 
         } else if (std::string(argv[argIdx]) == "random"){
+            names.emplace_back(std::to_string(names.size()+1) + ".random");
             players.emplace_back(std::make_shared<randomPlayer>(1));
-            names.emplace_back("random");
 
         } else if (std::string(argv[argIdx]) == "minimax"){
+            names.emplace_back(std::to_string(names.size()+1) + ".minimax");
             players.emplace_back(std::make_shared<Minimax>(1, 8, true));
-            names.emplace_back("minimax");
 
         } else if (std::string(argv[argIdx]) == "mcts"){
+            names.emplace_back(std::to_string(names.size()+1) + ".mcts");
             players.emplace_back(std::make_shared<MCTS>(1, 2000, 5.0, true));
-            names.emplace_back("mcts");
 
         } else if (std::string(argv[argIdx]) == "net"){
+            names.emplace_back(std::to_string(names.size()+1) + ".network");
             players.emplace_back(std::make_shared<NeuralNetPlayer>(1, std::string(argv[++argIdx])));
-            names.emplace_back("network");
 
         } else if (std::string(argv[argIdx]) == "c0"){
+            names.emplace_back(std::to_string(names.size()+1) + ".Checker Zero");
             players.emplace_back(std::make_shared<CheckerZero>(1, std::string(argv[++argIdx]), 1000, 5.0));
-            names.emplace_back("Checker Zero");
 
         } else if (std::string(argv[argIdx]) == "c1"){
+            names.emplace_back(std::to_string(names.size()+1) + ".Checker One");
             players.emplace_back(std::make_shared<CheckerOne>(1, std::string(argv[++argIdx]), 1000, 5.0));
-            names.emplace_back("Checker One");
 
         } else if (std::string(argv[argIdx]) == "games"){
             games = strint(argv[++argIdx]);
