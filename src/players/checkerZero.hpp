@@ -4,6 +4,10 @@
 #include "utils/netUtils.hpp"
 
 //MARK: CheckerZero
+/**
+ * Checker Zero algorithm is based on MCTS.
+ * We use a value neural network which predicts the winner for a given state instead of simulating a random game.
+ */
 struct CheckerZero: Bot{
     Network model;
 

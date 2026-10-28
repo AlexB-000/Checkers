@@ -11,9 +11,9 @@ using algo = CheckerZero;
 
 namespace train_conf{
     constexpr uint32_t iterations = 10;
-    constexpr uint32_t games = 10;
+    constexpr uint32_t games = 100;
 
-    constexpr uint32_t algo_iterations = 1000;
+    constexpr uint32_t algo_iterations = 100;
     constexpr float exploration = 5.0f;
     
     constexpr uint32_t GDepochs = 5;
@@ -181,7 +181,7 @@ public:
 
             std::cout << "\tData collected : " << replayBuffer.size() << " samples" << std::endl;
 
-            average_game_length /= static_cast<float>(train_conf::games * (i + 1));
+            average_game_length /= static_cast<float>(train_conf::games);
             std::cout << "\tAverage game length : " << average_game_length << " moves" << std::endl;
 
             std::vector<Array<float>> batch_data, batch_target;

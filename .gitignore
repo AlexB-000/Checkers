@@ -1,6 +1,6 @@
 .vscode/
 build
-bootstrap_save/*
+replay_buff_save/*
 raw_save/*
 
 # Prerequisites
